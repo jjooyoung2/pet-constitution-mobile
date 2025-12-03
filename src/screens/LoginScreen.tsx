@@ -203,46 +203,9 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation, route, onLogin, o
               console.log('📱 Platform:', Platform.OS);
               console.log('📱 Waiting for deep link callback...');
               
-              // 타임아웃 설정 (딥링크가 돌아올 때까지 대기)
-              if (oauthTimeoutRef.current) {
-                clearTimeout(oauthTimeoutRef.current);
-              }
-              oauthTimeoutRef.current = setTimeout(async () => {
-                console.log('⏰ OAuth timeout callback started');
-                
-                // 컴포넌트가 언마운트됐으면 무시 (로그인 성공으로 화면 전환된 경우)
-                if (!isMountedRef.current) {
-                  console.log('⏰ OAuth timeout fired but component unmounted - ignoring');
-                  return;
-                }
-                
-                // OAuth 로그인 성공 플래그 확인
-                const oauthSuccess = await AsyncStorage.getItem('oauthLoginSuccess');
-                if (oauthSuccess === 'true') {
-                  console.log('⏰ OAuth timeout fired but oauthLoginSuccess flag found - ignoring');
-                  await AsyncStorage.removeItem('oauthLoginSuccess');
-                  return;
-                }
-                
-                // 이미 로그인됐으면 무시 (토큰이 있으면 로그인 성공한 것)
-                const token = await AsyncStorage.getItem('authToken');
-                if (token) {
-                  console.log('⏰ OAuth timeout fired but already logged in - ignoring');
-                  return;
-                }
-                
-                console.log('⏰ OAuth timeout - no deep link received after 30 seconds');
-                console.log('⚠️ This might mean:');
-                console.log('   1. Browser did not open');
-                console.log('   2. Deep link is not configured correctly');
-                console.log('   3. Supabase redirect is not working');
-                setIsLoading(false);
-                Alert.alert(
-                  '로그인 시간 초과',
-                  '로그인 처리가 완료되지 않았습니다. 브라우저가 열렸는지 확인해주세요.',
-                  [{ text: '확인' }]
-                );
-              }, 30000);
+              // 타임아웃 제거 - OAuth 콜백이 확실히 처리되므로 불필요
+              // 브라우저가 열리면 사용자가 직접 로그인하고 돌아오므로 타임아웃 불필요
+              console.log('📱 카카오 로그인 브라우저 열림 - 딥링크 대기 중...');
             } catch (linkError) {
               console.error('❌ Failed to open URL with Linking:', linkError);
               setIsLoading(false);
@@ -311,42 +274,9 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation, route, onLogin, o
               await Linking.openURL(googleLoginUrl);
               console.log('Linking.openURL completed successfully');
               
-              // 타임아웃 설정 (딥링크가 돌아올 때까지 대기)
-              if (oauthTimeoutRef.current) {
-                clearTimeout(oauthTimeoutRef.current);
-              }
-              oauthTimeoutRef.current = setTimeout(async () => {
-                console.log('⏰ Google OAuth timeout callback started');
-                
-                // 컴포넌트가 언마운트됐으면 무시 (로그인 성공으로 화면 전환된 경우)
-                if (!isMountedRef.current) {
-                  console.log('OAuth timeout fired but component unmounted - ignoring');
-                  return;
-                }
-                
-                // OAuth 로그인 성공 플래그 확인
-                const oauthSuccess = await AsyncStorage.getItem('oauthLoginSuccess');
-                if (oauthSuccess === 'true') {
-                  console.log('OAuth timeout fired but oauthLoginSuccess flag found - ignoring');
-                  await AsyncStorage.removeItem('oauthLoginSuccess');
-                  return;
-                }
-                
-                // 이미 로그인됐으면 무시 (토큰이 있으면 로그인 성공한 것)
-                const token = await AsyncStorage.getItem('authToken');
-                if (token) {
-                  console.log('OAuth timeout fired but already logged in - ignoring');
-                  return;
-                }
-                
-                console.log('OAuth timeout - no deep link received after 30 seconds');
-                setIsLoading(false);
-                Alert.alert(
-                  '로그인 시간 초과',
-                  '로그인 처리가 완료되지 않았습니다.',
-                  [{ text: '확인' }]
-                );
-              }, 30000);
+              // 타임아웃 제거 - OAuth 콜백이 확실히 처리되므로 불필요
+              // 브라우저가 열리면 사용자가 직접 로그인하고 돌아오므로 타임아웃 불필요
+              console.log('📱 구글 로그인 브라우저 열림 - 딥링크 대기 중...');
             } catch (linkError) {
               console.error('Failed to open URL with Linking:', linkError);
               setIsLoading(false);

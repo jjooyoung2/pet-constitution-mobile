@@ -8,8 +8,8 @@
     "userInterfaceStyle": "light",
     "scheme": "petconstitution",
     "splash": {
-      "image": "./assets/splash.png",
-      "resizeMode": "cover",
+      "image": "./assets/splash-ios.png",
+      "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
     "assetBundlePatterns": [
@@ -17,11 +17,17 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.bjooyoung.petconstitutionmobile"
+      "bundleIdentifier": "com.bjooyoung.petconstitutionmobile",
+      "icon": "./assets/icon-ios.png"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "splash": {
+        "image": "./assets/splash.png",
+        "resizeMode": "contain",
         "backgroundColor": "#ffffff"
       },
       "package": "com.bjooyoung.petconstitutionmobile.dev",
