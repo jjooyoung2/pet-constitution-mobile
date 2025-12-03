@@ -9,6 +9,7 @@ import {
   ImageBackground,
 } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { globalStyles, scale, getFontFamily } from '../styles/globalStyles';
 import BottomNavigation from '../components/BottomNavigation';
 
@@ -17,11 +18,15 @@ interface ManagementMethodsScreenProps {
 }
 
 const ManagementMethodsScreen: React.FC<ManagementMethodsScreenProps> = ({ navigation }) => {
+  const insets = useSafeAreaInsets();
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView 
         style={styles.content}
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[
+          styles.scrollContent,
+          { paddingBottom: (styles.scrollContent.paddingBottom as number || scale(40)) + insets.bottom }
+        ]}
         showsVerticalScrollIndicator={true}
       >
         <View style={styles.mainContainer}>

@@ -1,0 +1,36 @@
+[1mdiff --git a/app.json b/app.json[m
+[1mindex 5435eda..6310cd9 100644[m
+[1m--- a/app.json[m
+[1m+++ b/app.json[m
+[36m@@ -8,8 +8,8 @@[m
+     "userInterfaceStyle": "light",[m
+     "scheme": "petconstitution",[m
+     "splash": {[m
+[31m-      "image": "./assets/splash.png",[m
+[31m-      "resizeMode": "cover",[m
+[32m+[m[32m      "image": "./assets/splash-ios.png",[m
+[32m+[m[32m      "resizeMode": "contain",[m
+       "backgroundColor": "#ffffff"[m
+     },[m
+     "assetBundlePatterns": [[m
+[36m@@ -17,13 +17,19 @@[m
+     ],[m
+     "ios": {[m
+       "supportsTablet": true,[m
+[31m-      "bundleIdentifier": "com.bjooyoung.petconstitutionmobile"[m
+[32m+[m[32m      "bundleIdentifier": "com.bjooyoung.petconstitutionmobile",[m
+[32m+[m[32m      "icon": "./assets/icon-ios.png"[m
+     },[m
+     "android": {[m
+       "adaptiveIcon": {[m
+         "foregroundImage": "./assets/adaptive-icon.png",[m
+         "backgroundColor": "#ffffff"[m
+       },[m
+[32m+[m[32m      "splash": {[m
+[32m+[m[32m        "image": "./assets/splash.png",[m
+[32m+[m[32m        "resizeMode": "contain",[m
+[32m+[m[32m        "backgroundColor": "#ffffff"[m
+[32m+[m[32m      },[m
+       "package": "com.bjooyoung.petconstitutionmobile.dev",[m
+       "minSdkVersion": 21,[m
+       "intentFilters": [[m

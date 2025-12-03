@@ -13,7 +13,7 @@ import {
   Dimensions,
   KeyboardAvoidingView,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { StackNavigationProp } from '@react-navigation/stack';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as MediaLibrary from 'expo-media-library';
@@ -49,6 +49,7 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({
   token,
   user,
 }) => {
+  const insets = useSafeAreaInsets();
   const { petInfo, answers, constitution: passedConstitution, isFromMyPage, resultId } = route.params || {};
   const [isSaving, setIsSaving] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
@@ -404,7 +405,10 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({
     <SafeAreaView ref={screenRef} style={styles.container}>
       <ScrollView 
         style={styles.content}
-        contentContainerStyle={globalStyles.scrollContent}
+        contentContainerStyle={[
+          globalStyles.scrollContent,
+          { paddingBottom: (globalStyles.scrollContent.paddingBottom as number || scale(40)) + insets.bottom }
+        ]}
         showsVerticalScrollIndicator={true}
       >
         <View style={styles.resultContainer}>

@@ -9,6 +9,7 @@ import {
   Image,
 } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { questions } from '../data/questions';
 import { globalStyles, scale, fonts, getFontFamily } from '../styles/globalStyles';
 
@@ -25,6 +26,7 @@ const SurveyScreen: React.FC<SurveyScreenProps> = ({
   isLoggedIn,
   token,
 }) => {
+  const insets = useSafeAreaInsets();
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState<string[]>([]);
   const { petInfo } = route.params || {};
@@ -78,7 +80,10 @@ const SurveyScreen: React.FC<SurveyScreenProps> = ({
     <SafeAreaView style={styles.container}>
       <ScrollView 
         style={styles.scrollView}
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[
+          styles.scrollContent,
+          { paddingBottom: (styles.scrollContent.paddingBottom as number || scale(40)) + insets.bottom }
+        ]}
         showsVerticalScrollIndicator={true}
       >
         <View style={styles.content}>

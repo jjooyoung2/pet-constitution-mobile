@@ -13,6 +13,7 @@ import {
 import { StackNavigationProp } from '@react-navigation/stack';
 import { Linking, Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { scale, fonts, getFontFamily } from '../styles/globalStyles';
 
 interface LoginScreenProps {
@@ -26,6 +27,7 @@ interface LoginScreenProps {
 }
 
 const LoginScreen: React.FC<LoginScreenProps> = ({ navigation, route, onLogin, onRegister, onFindId, onFindPassword, onOAuthCallback }) => {
+  const insets = useSafeAreaInsets();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [nickname, setNickname] = useState('');
@@ -349,7 +351,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation, route, onLogin, o
         ]}
       >
         {/* 하단: 흰색 배경 + 로그인 버튼 */}
-        <View style={styles.bottomSection}>
+        <View style={[styles.bottomSection, { paddingBottom: styles.bottomSection.paddingBottom + insets.bottom }]}>
           {/* 카카오 로그인 버튼 */}
           <TouchableOpacity
             style={[styles.socialButton, isLoading && styles.disabledButton]}
