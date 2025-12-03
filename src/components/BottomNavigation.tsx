@@ -102,7 +102,6 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     backgroundColor: '#ffffff',
-    paddingTop: scale(20),
     justifyContent: 'space-around',
     alignItems: 'center',
     shadowColor: '#000',
@@ -130,7 +129,7 @@ const styles = StyleSheet.create({
   },
   navIcon: {
     width: scale(75),
-    height: scale(75),
+    height:scale(75),
     opacity: 0.6,
   },
   activeNavIcon: {

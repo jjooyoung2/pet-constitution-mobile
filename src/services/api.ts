@@ -94,7 +94,23 @@ const apiCall = async <T = any>(endpoint: string, options: RequestInit = {}): Pr
     console.log('Response headers:', response.headers);
     console.log('Response ok:', response.ok);
     
-    const data = await response.json();
+    // 응답 텍스트를 먼저 가져옴
+    const responseText = await response.text();
+    console.log('Response text (first 200 chars):', responseText.substring(0, 200));
+    
+    // JSON 파싱 시도
+    let data;
+    try {
+      data = JSON.parse(responseText);
+    } catch (parseError) {
+      console.error('JSON Parse Error:', parseError);
+      console.error('Response was not valid JSON. Response text:', responseText.substring(0, 500));
+      // HTML 에러 페이지인 경우 적절한 에러 메시지 반환
+      if (responseText.includes('<!DOCTYPE') || responseText.includes('<html')) {
+        throw new Error('서버에서 예상치 못한 응답을 반환했습니다. 잠시 후 다시 시도해주세요.');
+      }
+      throw new Error('서버 응답을 처리할 수 없습니다.');
+    }
     console.log('API Response:', { status: response.status, data });
     
     // 디버깅을 위한 추가 로그

@@ -331,7 +331,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flexGrow: 1,
-    paddingBottom: scale(450),
+    paddingBottom: scale(180),
   },
   mainContainer: {
     // paddingBottom: scale(100), // 일러스트가 바닥에 딱 붙도록 제거

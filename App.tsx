@@ -266,6 +266,8 @@ export default function App() {
         if (refreshToken) {
           await AsyncStorage.setItem('refreshToken', refreshToken);
         }
+        // OAuth 로그인 성공 플래그 저장 (LoginScreen 타임아웃 방지용)
+        await AsyncStorage.setItem('oauthLoginSuccess', 'true');
         
         console.log('OAuth login/signup successful');
         setIsLoggedIn(true);

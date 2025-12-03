@@ -1156,6 +1156,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'flex-end',
     flex: 1,
+    marginVertical: scale(50),
   },
   resultTitle: {
     fontSize: scale(116),
@@ -1901,7 +1902,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: scale(10),
     fontFamily: getFontFamily('regular'),
-    marginBottom: scale(200),
+    marginBottom: scale(300),
   },
 });
 

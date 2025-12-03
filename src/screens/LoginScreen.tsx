@@ -33,8 +33,10 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation, route, onLogin, o
   const [isLoading, setIsLoading] = useState(false);
   const slideAnim = useRef(new Animated.Value(300)).current; // 시작 위치를 화면 아래로
   const oauthTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const isMountedRef = useRef(true); // 마운트 상태 추적
 
   useEffect(() => {
+    isMountedRef.current = true;
     // 모달이 나타날 때 애니메이션
     Animated.spring(slideAnim, {
       toValue: 0,
@@ -71,7 +73,13 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation, route, onLogin, o
     });
     
     return () => {
+      isMountedRef.current = false; // 언마운트 표시
       linkingListener?.remove();
+      // 컴포넌트 언마운트 시 OAuth 타임아웃 클리어
+      if (oauthTimeoutRef.current) {
+        clearTimeout(oauthTimeoutRef.current);
+        oauthTimeoutRef.current = null;
+      }
     };
   }, []);
 
@@ -199,7 +207,30 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation, route, onLogin, o
               if (oauthTimeoutRef.current) {
                 clearTimeout(oauthTimeoutRef.current);
               }
-              oauthTimeoutRef.current = setTimeout(() => {
+              oauthTimeoutRef.current = setTimeout(async () => {
+                console.log('⏰ OAuth timeout callback started');
+                
+                // 컴포넌트가 언마운트됐으면 무시 (로그인 성공으로 화면 전환된 경우)
+                if (!isMountedRef.current) {
+                  console.log('⏰ OAuth timeout fired but component unmounted - ignoring');
+                  return;
+                }
+                
+                // OAuth 로그인 성공 플래그 확인
+                const oauthSuccess = await AsyncStorage.getItem('oauthLoginSuccess');
+                if (oauthSuccess === 'true') {
+                  console.log('⏰ OAuth timeout fired but oauthLoginSuccess flag found - ignoring');
+                  await AsyncStorage.removeItem('oauthLoginSuccess');
+                  return;
+                }
+                
+                // 이미 로그인됐으면 무시 (토큰이 있으면 로그인 성공한 것)
+                const token = await AsyncStorage.getItem('authToken');
+                if (token) {
+                  console.log('⏰ OAuth timeout fired but already logged in - ignoring');
+                  return;
+                }
+                
                 console.log('⏰ OAuth timeout - no deep link received after 30 seconds');
                 console.log('⚠️ This might mean:');
                 console.log('   1. Browser did not open');
@@ -284,7 +315,30 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation, route, onLogin, o
               if (oauthTimeoutRef.current) {
                 clearTimeout(oauthTimeoutRef.current);
               }
-              oauthTimeoutRef.current = setTimeout(() => {
+              oauthTimeoutRef.current = setTimeout(async () => {
+                console.log('⏰ Google OAuth timeout callback started');
+                
+                // 컴포넌트가 언마운트됐으면 무시 (로그인 성공으로 화면 전환된 경우)
+                if (!isMountedRef.current) {
+                  console.log('OAuth timeout fired but component unmounted - ignoring');
+                  return;
+                }
+                
+                // OAuth 로그인 성공 플래그 확인
+                const oauthSuccess = await AsyncStorage.getItem('oauthLoginSuccess');
+                if (oauthSuccess === 'true') {
+                  console.log('OAuth timeout fired but oauthLoginSuccess flag found - ignoring');
+                  await AsyncStorage.removeItem('oauthLoginSuccess');
+                  return;
+                }
+                
+                // 이미 로그인됐으면 무시 (토큰이 있으면 로그인 성공한 것)
+                const token = await AsyncStorage.getItem('authToken');
+                if (token) {
+                  console.log('OAuth timeout fired but already logged in - ignoring');
+                  return;
+                }
+                
                 console.log('OAuth timeout - no deep link received after 30 seconds');
                 setIsLoading(false);
                 Alert.alert(
@@ -511,7 +565,7 @@ const styles = StyleSheet.create({
   },
   bottomSection: {
     paddingTop: scale(140),
-    paddingBottom: scale(240),
+    paddingBottom: scale(140),
     paddingHorizontal: scale(160),
     justifyContent: 'flex-start',
   },

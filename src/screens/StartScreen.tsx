@@ -120,7 +120,7 @@ const StartScreen: React.FC<StartScreenProps> = ({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#eee9e5', // 베이지색 배경
+    backgroundColor: '#eee9e5',
   },
   scrollView: {
     flex: 1,
@@ -137,6 +137,7 @@ const styles = StyleSheet.create({
   },
   header: {
     alignItems: 'center',
+    marginTop: scale(150),
     marginBottom: scale(40),
   },
   welcomeText: {

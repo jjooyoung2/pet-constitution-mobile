@@ -76,85 +76,86 @@ const SurveyScreen: React.FC<SurveyScreenProps> = ({
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.content}>
-        <View style={styles.header}>
-          
-          {/* 진행률 바 */}
-          <View style={styles.progressContainer}>
-            {/* 배경 그림자 이미지 (::before처럼) */}
-            <View style={styles.progressBarShadow}>
-              <Image 
-                source={require('../../assets/images/surveyscreen-shadow.png')} 
-                style={styles.shadowImage}
-                resizeMode="stretch"
-              />
-            </View>
-            {/* 프로그레스바 (위에 겹침) */}
-            <View style={styles.progressBar}>
-              <View style={[styles.progressFill, { width: `${progress}%` }]} />
-            </View>
-            {/* 퍼센트 표시 원 */}
-            <View style={[
-              styles.percentBadge,
-              { 
-                left: progress >= 100 
-                  ? '100%' 
-                  : `${progress}%`, 
-                transform: progress >= 100 
-                  ? [{ translateX: scale(-42.5) }] 
-                  : [{ translateX: scale(-25) }]
-              }
-            ]}>
-              <View style={styles.percentTextContainer}>
-                <Text style={styles.percentNumber}>{Math.round(progress)}</Text>
-                <Text style={styles.percentSymbol}>%</Text>
+      <ScrollView 
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={true}
+      >
+        <View style={styles.content}>
+          <View style={styles.header}>
+            
+            {/* 진행률 바 */}
+            <View style={styles.progressContainer}>
+              {/* 배경 그림자 이미지 (::before처럼) */}
+              <View style={styles.progressBarShadow}>
+                <Image 
+                  source={require('../../assets/images/surveyscreen-shadow.png')} 
+                  style={styles.shadowImage}
+                  resizeMode="stretch"
+                />
+              </View>
+              {/* 프로그레스바 (위에 겹침) */}
+              <View style={styles.progressBar}>
+                <View style={[styles.progressFill, { width: `${progress}%` }]} />
+              </View>
+              {/* 퍼센트 표시 원 */}
+              <View style={[
+                styles.percentBadge,
+                { 
+                  left: progress >= 100 
+                    ? '100%' 
+                    : `${progress}%`, 
+                  transform: progress >= 100 
+                    ? [{ translateX: scale(-42.5) }] 
+                    : [{ translateX: scale(-25) }]
+                }
+              ]}>
+                <View style={styles.percentTextContainer}>
+                  <Text style={styles.percentNumber}>{Math.round(progress)}</Text>
+                  <Text style={styles.percentSymbol}>%</Text>
+                </View>
               </View>
             </View>
           </View>
-        </View>
 
-        <ScrollView 
-          style={styles.questionContainer}
-          contentContainerStyle={globalStyles.scrollContent}
-          showsVerticalScrollIndicator={true}
-        >
-          <Text style={styles.question}>
-            Q. {questions[currentQuestion].question}
-          </Text>
+          <View style={styles.questionContainer}>
+            <Text style={styles.question}>
+              Q. {questions[currentQuestion].question}
+            </Text>
 
-          <View style={styles.optionsContainer}>
-            {questions[currentQuestion].options.map((option, index) => {
-              const isSelected = currentAnswer === option.type;
-              return (
-                <TouchableOpacity
-                  key={index}
-                  style={[
-                    styles.optionButton,
-                    isSelected && styles.optionButtonSelected,
-                  ]}
-                  onPress={() => handleAnswer(index)}
-                >
-                  {isSelected && (
-                    <View style={styles.checkIcon}>
-                      <Image 
-                        source={require('../../assets/images/surveyscreen-checked.png')} 
-                        style={styles.checkImage}
-                      />
-                    </View>
-                  )}
-                  <Text style={[
-                    styles.optionText,
-                    isSelected && styles.optionTextSelected,
-                  ]}>
-                    {option.text}
-                  </Text>
-                </TouchableOpacity>
-              );
-            })}
+            <View style={styles.optionsContainer}>
+              {questions[currentQuestion].options.map((option, index) => {
+                const isSelected = currentAnswer === option.type;
+                return (
+                  <TouchableOpacity
+                    key={index}
+                    style={[
+                      styles.optionButton,
+                      isSelected && styles.optionButtonSelected,
+                    ]}
+                    onPress={() => handleAnswer(index)}
+                  >
+                    {isSelected && (
+                      <View style={styles.checkIcon}>
+                        <Image 
+                          source={require('../../assets/images/surveyscreen-checked.png')} 
+                          style={styles.checkImage}
+                        />
+                      </View>
+                    )}
+                    <Text style={[
+                      styles.optionText,
+                      isSelected && styles.optionTextSelected,
+                    ]}>
+                      {option.text}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
           </View>
-        </ScrollView>
 
-        <View style={styles.navigation}>
+          <View style={styles.navigation}>
           {isLastQuestion ? (
             <>
               <TouchableOpacity style={styles.backButton} onPress={goBack}>
@@ -186,7 +187,8 @@ const SurveyScreen: React.FC<SurveyScreenProps> = ({
             </TouchableOpacity>
           )}
         </View>
-      </View>
+        </View>
+      </ScrollView>
     </SafeAreaView>
   );
 };
@@ -196,8 +198,13 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#eee9e5',
   },
-  content: {
+  scrollView: {
     flex: 1,
+  },
+  scrollContent: {
+    flexGrow: 1,
+  },
+  content: {
     paddingHorizontal: scale(150),
     paddingVertical: scale(150),
   },
@@ -271,7 +278,7 @@ const styles = StyleSheet.create({
   percentNumber: {
     color: '#ffffff',
     fontSize: scale(30),
-    fontFamily: getFontFamily('bold'),
+    fontFamily: getFontFamily('extraBold'),
     textAlign: 'center',
   },
   percentSymbol: {
@@ -281,13 +288,13 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   questionContainer: {
-    flex: 1,
   },
   question: {
     fontSize: scale(48),
     fontFamily: getFontFamily('bold'),
     color: '#0e0e0e',
-    marginVertical: scale(150),
+    marginBottom: scale(150),
+    marginTop: scale(100),
     textAlign: 'center',
   },
   optionsContainer: {
@@ -336,6 +343,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: scale(50),
+    marginTop: scale(200),
   },
   backButton: {
     backgroundColor: '#ccbeb1',
