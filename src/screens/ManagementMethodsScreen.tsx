@@ -35,14 +35,11 @@ const ManagementMethodsScreen: React.FC<ManagementMethodsScreenProps> = ({ navig
             <Image source={require('../../assets/images/management-line.png')} style={styles.lineImage} />
             <Text style={styles.mainTitle}>"체질이 다르면 관리도 달라야 합니다."</Text>
             <Text style={styles.introText}>
-              오행 체질 검사는 아이의 기질과 장부 균형(목ㆍ화ㆍ토ㆍ금ㆍ수)을{"\n"}
-              점수화 해 주체질과 보조 체질을 도출합니다.{"\n"}
+              오행 체질 검사는 아이의 기질과 장부 균형(목ㆍ화ㆍ토ㆍ금ㆍ수)을 점수화 해 주체질과 보조 체질을 도출합니다.{"\n"}
               {"\n"}
-              주체질은 현재 몸의 중심 경향,{"\n"}
-              보조 체질은 상황에 따라 드러나는 보완 성향을 뜻합니다.{"\n"}
+              주체질은 현재 몸의 중심 경향, 보조 체질은 상황에 따라 드러나는 보완 성향을 뜻합니다.{"\n"}
               {"\n"}
-              결과는 식단 선택, 계절 관리,{"\n"}
-              재활ㆍ침구ㆍ한약 처방의 방향을 정하는 지침으로 활용됩니다.
+              결과는 식단 선택, 계절 관리, 재활ㆍ침구ㆍ한약 처방의 방향을 정하는 지침으로 활용됩니다.
             </Text>
           </View>
 
@@ -56,11 +53,11 @@ const ManagementMethodsScreen: React.FC<ManagementMethodsScreenProps> = ({ navig
             <View style={styles.combinationItem}>
               <Text style={styles.combinationTitle}>목(木)+화(火)</Text>
               <Text style={styles.combinationDescription}>
-                활동성과 열감이 높아{"\n"}
-                집중력 저하와 갈증이 나타날 수 있습니다.{"\n"}
-                닭고기와 보리를 기본으로, 수분이 많은 채소{"\n"}
-                및 과일(오이, 수박) 등을 소량으로 곁들여 급여해보세요.{"\n"}
-                또한 한낮 야외활동은 줄이고,{"\n"}
+                활동성과 열감이 높아
+                집중력 저하와 갈증이 나타날 수 있습니다.
+                닭고기와 보리를 기본으로, 수분이 많은 채소
+                및 과일(오이, 수박) 등을 소량으로 곁들여 급여해보세요.
+                또한 한낮 야외활동은 줄이고,
                 열과 스트레스를 함께 관리하는 것이 좋습니다.
               </Text>
             </View>
@@ -68,10 +65,10 @@ const ManagementMethodsScreen: React.FC<ManagementMethodsScreenProps> = ({ navig
             <View style={styles.combinationItem}>
               <Text style={styles.combinationTitle}>토(土)+금(金)</Text>
               <Text style={styles.combinationDescription}>
-                소화기 부담과 건조 민감이 함께 올 수 있으니,{"\n"}
-                찹쌀로 위를 보호하고 오리고기와 배를 활용해{"\n"}
-                건조함을 보완해보세요.{"\n"}
-                건조한 날에는 실내 습도 조절과 피부 보습 루틴을{"\n"}
+                소화기 부담과 건조 민감이 함께 올 수 있으니,
+                찹쌀로 위를 보호하고 오리고기와 배를 활용해
+                건조함을 보완해보세요.
+                건조한 날에는 실내 습도 조절과 피부 보습 루틴을
                 꾸준히 유지하는 것을 권장합니다.
               </Text>
             </View>
@@ -79,8 +76,8 @@ const ManagementMethodsScreen: React.FC<ManagementMethodsScreenProps> = ({ navig
             <View style={[styles.combinationItem, styles.combinationItemLast]}>
               <Text style={styles.combinationTitle}>수(水)+목(木)</Text>
               <Text style={styles.combinationDescription}>
-                추위 민감과 근육, 힘줄 긴장이 겹칠 수 있습니다.{"\n"}
-                양고기와 흑미로 온기를 돋우고,{"\n"}
+                추위 민감과 근육, 힘줄 긴장이 겹칠 수 있습니다.
+                양고기와 흑미로 온기를 돋우고,
                 스트레칭형 산책과 저강도 근력 루틴을 권장합니다.
               </Text>
             </View>
@@ -222,8 +219,8 @@ const ManagementMethodsScreen: React.FC<ManagementMethodsScreenProps> = ({ navig
             <View style={[styles.treatmentItem, styles.treatmentItemFirst]}>
               <Text style={styles.treatmentTitle}>정밀진단</Text>
               <Text style={styles.treatmentDescription}>
-                X-ray로 뼈와 관절, 흉복부 구조를 확인하고, 초음파로 장기 상태,{"\n"}
-                혈액검사로 염증 여부와 장기 기능을 살펴봅니다.{"\n"}
+                X-ray로 뼈와 관절, 흉복부 구조를 확인하고, 초음파로 장기 상태,
+                혈액검사로 염증 여부와 장기 기능을 살펴봅니다.
                 이를 통해 현재 건강 상태와 질병의 원인을 객관적으로 파악할 수 있습니다.
               </Text>
             </View>
@@ -231,7 +228,7 @@ const ManagementMethodsScreen: React.FC<ManagementMethodsScreenProps> = ({ navig
             <View style={styles.treatmentItem}>
               <Text style={styles.treatmentTitle}>침구·뜸</Text>
               <Text style={styles.treatmentDescription}>
-                통증 완화하고 혈류를 개선하며, 신경 기능 회복을 돕습니다.{"\n"}
+                통증 완화하고 혈류를 개선하며, 신경 기능 회복을 돕습니다.
                 특히 만성적인 관절 및 신경 질환에 효과적입니다.
               </Text>
             </View>
@@ -239,9 +236,9 @@ const ManagementMethodsScreen: React.FC<ManagementMethodsScreenProps> = ({ navig
             <View style={styles.treatmentItem}>
               <Text style={styles.treatmentTitle}>저온 레이저 마사지 치료</Text>
               <Text style={styles.treatmentDescription}>
-                일반 레이저 원리를 활용하면서도{"\n"}
-                저온 방식으로 화상 위험 없이 안전하게 전신 부위에 적용 가능합니다.{"\n"}
-                근육 긴장 완화, 미세순환 촉진, 회복력 향상에 도움이 되며{"\n"}
+                일반 레이저 원리를 활용하면서도
+                저온 방식으로 화상 위험 없이 안전하게 전신 부위에 적용 가능합니다.
+                근육 긴장 완화, 미세순환 촉진, 회복력 향상에 도움이 되며
                 침ㆍ뜸과 병행 시 효과가 더욱 높아집니다.
               </Text>
             </View>
@@ -249,7 +246,7 @@ const ManagementMethodsScreen: React.FC<ManagementMethodsScreenProps> = ({ navig
             <View style={styles.treatmentItem}>
               <Text style={styles.treatmentTitle}>체질 맞춤 한약</Text>
               <Text style={styles.treatmentDescription}>
-                체질과 증상에 맞춰 면역, 염증, 장부 기능의 균형을 조절합니다.{"\n"}
+                체질과 증상에 맞춰 면역, 염증, 장부 기능의 균형을 조절합니다.
                 복용 용량과 기간은 아이의 체중, 검사 결과, 경과에 따라 세밀 조정합니다.
               </Text>
             </View>
@@ -257,8 +254,8 @@ const ManagementMethodsScreen: React.FC<ManagementMethodsScreenProps> = ({ navig
             <View style={styles.treatmentItem}>
               <Text style={styles.treatmentTitle}>서양의학적 처치</Text>
               <Text style={styles.treatmentDescription}>
-                급성 감염, 외상, 수술 적응 등에는{"\n"}
-                항염제ㆍ소염제ㆍ수액ㆍ수술 등 표준 치료를 우선 적용합니다.{"\n"}
+                급성 감염, 외상, 수술 적응 등에는
+                항염제ㆍ소염제ㆍ수액ㆍ수술 등 표준 치료를 우선 적용합니다.
                 한방 치료는 회복과 재발 방지에 보조 및 상승 효과를 기대할 수 있습니다.
               </Text>
             </View>
@@ -274,14 +271,14 @@ const ManagementMethodsScreen: React.FC<ManagementMethodsScreenProps> = ({ navig
             </View>
             
             <Text style={styles.tipContent}>
-              새로운 재료는 3~5일간 소량 도입 후 대변, 피부, 활동성 변화를 관찰하세요.{"\n"}
-              간식은 하루 총열량의 10% 내에서 조절하고,{"\n"}
-              체중과 활동량에 따라 주 단위로 급식량을 미세 조정합니다.{"\n"}
-              한약ㆍ영양제ㆍ서양약을 함께 사용할 때는 상호작용을 고려해{"\n"}
+              새로운 재료는 3~5일간 소량 도입 후 대변, 피부, 활동성 변화를 관찰하세요.
+              간식은 하루 총열량의 10% 내에서 조절하고,
+              체중과 활동량에 따라 주 단위로 급식량을 미세 조정합니다.
+              한약ㆍ영양제ㆍ서양약을 함께 사용할 때는 상호작용을 고려해
               투약 간격과 용량을 병원 지시에 맞춰 주세요.
             </Text>
             <Text style={styles.tipContent2}>
-              장기 관리가 필요한 만성 질환은 4-8주 단위로 재검사하고,{"\n"}
+              장기 관리가 필요한 만성 질환은 4-8주 단위로 재검사하고,
               계절 전환기엔 식단과 운동 루틴을 다시 점검하는 것이 좋습니다.
             </Text>
             
@@ -291,13 +288,13 @@ const ManagementMethodsScreen: React.FC<ManagementMethodsScreenProps> = ({ navig
               resizeMode="contain"
             >
               <Text style={styles.speechBubbleText}>
-                오행 결과는 아이의 현재 경향을 읽는 지도입니다.{"\n"}
-                오늘의 환경, 계절, 스트레스, 기존 질환에 따라 조정이 필요하며,{"\n"}
+                오행 결과는 아이의 현재 경향을 읽는 지도입니다.
+                오늘의 환경, 계절, 스트레스, 기존 질환에 따라 조정이 필요하며,
                 정밀검사와 문진을 통해 맞춤 처방을 완성합니다.
               </Text>
               <Text style={styles.speechBubbleText2}>
-                예약 또는 추가 상담을 원하시면 언제든 문의 주세요.{"\n"}
-                온솔 양한방 동물병원이 아이의 오늘의 편안함과{"\n"}
+                예약 또는 추가 상담을 원하시면 언제든 문의 주세요.
+                온솔 양한방 동물병원이 아이의 오늘의 편안함과
                 내일의 건강을 함께 설계하겠습니다.
               </Text>
             </ImageBackground>
@@ -395,6 +392,7 @@ const styles = StyleSheet.create({
   },
   combinationItem: {
     paddingTop: scale(50),
+    paddingHorizontal: scale(65),
   },
   combinationItemLast: {
     paddingBottom: scale(50),
@@ -617,6 +615,7 @@ const styles = StyleSheet.create({
   },
   speechBubble: {
     marginTop: scale(50),
+    paddingHorizontal: scale(65),
     width: scale(868),
     height: scale(402),
     marginBottom: scale(650),

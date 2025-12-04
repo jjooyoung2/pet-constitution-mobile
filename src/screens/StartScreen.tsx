@@ -107,7 +107,7 @@ const StartScreen: React.FC<StartScreenProps> = ({
               </Text>
             </TouchableOpacity>
             <Text style={styles.disclaimer}>
-              {isLoggedIn ? '※ 내 정보와 진단 결과를 확인할 수 있습니다' : '※ 결과는 브라우저에만 저장됩니다'}
+              {isLoggedIn ? '※ 내 정보와 진단 결과를 확인할 수 있습니다.' : '※ 결과는 브라우저에만 저장됩니다.'}
             </Text>
           </View>
         </View>
