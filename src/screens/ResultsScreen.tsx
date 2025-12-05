@@ -12,6 +12,7 @@ import {
   ImageBackground,
   Dimensions,
   KeyboardAvoidingView,
+  Linking,
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { StackNavigationProp } from '@react-navigation/stack';
@@ -856,7 +857,10 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({
           <Text style={styles.hospitalName}>ONSOL ANIMAL HOSPITAL</Text>
 
           <View style={styles.serviceCardsContainer}>
-            <TouchableOpacity style={styles.serviceCard}>
+            <TouchableOpacity 
+              style={styles.serviceCard}
+              onPress={() => Linking.openURL('https://blog.naver.com/PostList.naver?blogId=onsolah&from=postList&categoryNo=9&parentCategoryNo=9')}
+            >
               {/* TODO: service-laser.png 이미지 추가 */}
               <View style={styles.serviceCardIconPlaceholder}>
                 <Image source={require('../../assets/images/results-btnicon1.png')} style={styles.serviceCardIcon1} />
@@ -893,7 +897,10 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({
               </Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.serviceCard}>
+            <TouchableOpacity 
+              style={styles.serviceCard}
+              onPress={() => Linking.openURL('https://pcmap.place.naver.com/place/2096920117/booking?bookingRedirectUrl=https%3A%2F%2Fm.booking.naver.com%2Fbooking%2F13%2Fbizes%2F1514920&theme=place&entry=pll&lang=ko&from=map&fromPanelNum=1&additionalHeight=76&timestamp=202512041413&locale=ko&svcName=map_pcv5&area=pll&map-search=1')}
+            >
               {/* TODO: service-xray.png 이미지 추가 */}
               <View style={styles.serviceCardIconPlaceholder}>
                 <Image source={require('../../assets/images/results-btnicon3.png')} style={styles.serviceCardIcon3} />
