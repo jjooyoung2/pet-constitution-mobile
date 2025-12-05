@@ -32,6 +32,15 @@ const HtmlCaptureScreen: React.FC<HtmlCaptureScreenProps> = ({ navigation, route
 
   useEffect(() => {
     const loadHtml = async () => {
+      // 🔥 화면 진입 시 가장 먼저 권한 요청 (중간에 팝업 뜨는 것 방지)
+      const { status } = await MediaLibrary.requestPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('권한 필요', '갤러리에 저장하려면 권한이 필요합니다.', [
+          { text: '확인', onPress: () => navigation.goBack() },
+        ]);
+        return;
+      }
+
       // 직접 HTML이 전달된 경우
       if (directHtml) {
         setHtml(directHtml);
@@ -139,10 +148,10 @@ const HtmlCaptureScreen: React.FC<HtmlCaptureScreenProps> = ({ navigation, route
   useEffect(() => {
     // WebView가 완전히 로드된 후에만 캡처
     if (html && isWebViewLoaded && !isCapturing) {
-      // WebView 로드 완료 후 추가 딜레이 (폰트/이미지 로드 대기)
+      // WebView 로드 완료 후 딜레이 최소화
       const timer = setTimeout(() => {
         captureImageWithCanvas();
-      }, 2000); // 2초 대기
+      }, 500); // 0.5초 대기
 
       return () => clearTimeout(timer);
     }
@@ -185,7 +194,7 @@ const HtmlCaptureScreen: React.FC<HtmlCaptureScreenProps> = ({ navigation, route
               const totalImages = images.length;
               
               if (totalImages === 0) {
-                setTimeout(capture, 3000);
+                setTimeout(capture, 300);
                 return;
               }
               
@@ -196,28 +205,28 @@ const HtmlCaptureScreen: React.FC<HtmlCaptureScreenProps> = ({ navigation, route
                   img.onload = () => {
                     loadedCount++;
                     if (loadedCount === totalImages) {
-                      setTimeout(capture, 2000);
+                      setTimeout(capture, 300);
                     }
                   };
                   img.onerror = () => {
                     loadedCount++;
                     if (loadedCount === totalImages) {
-                      setTimeout(capture, 2000);
+                      setTimeout(capture, 300);
                     }
                   };
                 }
               });
               
               if (loadedCount === totalImages) {
-                setTimeout(capture, 3000);
+                setTimeout(capture, 300);
               } else {
-                // 최대 10초 대기
+                // 최대 5초 대기
                 setTimeout(() => {
                   if (loadedCount < totalImages) {
                     console.log('일부 이미지 로딩 실패, 계속 진행...');
-                    setTimeout(capture, 2000);
+                    setTimeout(capture, 300);
                   }
-                }, 10000);
+                }, 5000);
               }
             };
             
@@ -245,7 +254,7 @@ const HtmlCaptureScreen: React.FC<HtmlCaptureScreenProps> = ({ navigation, route
               
               html2canvas(body, {
                 backgroundColor: '#fff',
-                scale: 2,
+                scale: 1,
                 useCORS: true,
                 allowTaint: true,
                 width: fixedWidth,
@@ -311,15 +320,7 @@ const HtmlCaptureScreen: React.FC<HtmlCaptureScreenProps> = ({ navigation, route
         const base64Data = data.image.replace(/^data:image\/\w+;base64,/, '');
         const filename = `pet-constitution-${Date.now()}.png`;
         
-        // 권한 요청
-        const { status } = await MediaLibrary.requestPermissionsAsync();
-        if (status !== 'granted') {
-          Alert.alert('권한 필요', '갤러리에 저장하려면 권한이 필요합니다.', [
-            { text: '확인', onPress: () => navigation.goBack() },
-          ]);
-          setIsCapturing(false);
-          return;
-        }
+        // 권한은 ResultsScreen에서 이미 받았음 (중복 요청 제거)
 
         // FileSystem 접근 시도 (여러 방법)
         let fileUri: string | null = null;
@@ -446,58 +447,50 @@ const HtmlCaptureScreen: React.FC<HtmlCaptureScreenProps> = ({ navigation, route
     }
   };
 
-  if (!html || isLoading) {
-    return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#555" />
-        <Text style={styles.loadingText}>이미지 생성 중...</Text>
-      </View>
-    );
-  }
-
   return (
     <View style={styles.container}>
-      <WebView
-        ref={webViewRef}
-        originWhitelist={['*']}
-        source={{ 
-          html: html || '',
-          baseUrl: 'https://localhost'
-        }}
-        style={styles.webView}
-        scalesPageToFit={false}
+      {html && (
+        <WebView
+          ref={webViewRef}
+          originWhitelist={['*']}
+          source={{ 
+            html: html || '',
+            baseUrl: 'https://localhost'
+          }}
+          style={styles.webView}
+          scalesPageToFit={false}
         onLoadEnd={() => {
           console.log('WebView 로드 완료');
-          // 추가 딜레이를 두고 로드 완료 상태로 설정 (폰트/이미지 로드 대기)
+          // 딜레이 최소화
           setTimeout(() => {
             setIsWebViewLoaded(true);
-          }, 1000);
+          }, 300);
         }}
-        onMessage={handleWebViewMessage}
-        onError={(syntheticEvent) => {
-          const { nativeEvent } = syntheticEvent;
-          console.error('WebView 에러:', nativeEvent);
-          Alert.alert('WebView 오류', `HTML 렌더링 중 오류 발생: ${nativeEvent.description}`, [
-            { text: '확인', onPress: () => navigation.goBack() },
-          ]);
-        }}
-        javaScriptEnabled={true}
-        domStorageEnabled={true}
-        mixedContentMode="always"
-        allowsInlineMediaPlayback={true}
-        mediaPlaybackRequiresUserAction={false}
-        startInLoadingState={true}
-        renderToHardwareTextureAndroid={true}
-        showsHorizontalScrollIndicator={false}
-        showsVerticalScrollIndicator={false}
-        scrollEnabled={true}
-      />
-      {isCapturing && (
-        <View style={styles.overlay}>
-          <ActivityIndicator size="large" color="#fff" />
-          <Text style={styles.overlayText}>이미지 저장 중...</Text>
-        </View>
+          onMessage={handleWebViewMessage}
+          onError={(syntheticEvent) => {
+            const { nativeEvent } = syntheticEvent;
+            console.error('WebView 에러:', nativeEvent);
+            Alert.alert('WebView 오류', `HTML 렌더링 중 오류 발생: ${nativeEvent.description}`, [
+              { text: '확인', onPress: () => navigation.goBack() },
+            ]);
+          }}
+          javaScriptEnabled={true}
+          domStorageEnabled={true}
+          mixedContentMode="always"
+          allowsInlineMediaPlayback={true}
+          mediaPlaybackRequiresUserAction={false}
+          startInLoadingState={true}
+          renderToHardwareTextureAndroid={true}
+          showsHorizontalScrollIndicator={false}
+          showsVerticalScrollIndicator={false}
+          scrollEnabled={true}
+        />
       )}
+      {/* 처음부터 끝까지 동일한 오버레이 표시 */}
+      <View style={styles.overlay}>
+        <ActivityIndicator size="large" color="#fff" />
+        <Text style={styles.overlayText}>이미지 저장 중...</Text>
+      </View>
     </View>
   );
 };
