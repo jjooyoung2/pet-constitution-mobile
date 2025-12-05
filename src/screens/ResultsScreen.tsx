@@ -323,8 +323,6 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({
       const icon3Base64 = ICON3_IMAGE_BASE64 && ICON3_IMAGE_BASE64.length > 0 ? `data:image/png;base64,${ICON3_IMAGE_BASE64}` : '';
       const icon4Base64 = ICON4_IMAGE_BASE64 && ICON4_IMAGE_BASE64.length > 0 ? `data:image/png;base64,${ICON4_IMAGE_BASE64}` : '';
       
-      // 서버에서 이미지 생성
-      const authToken = token || await AsyncStorage.getItem('authToken');
       const requestData = { 
         ...constitutionInfo, 
         doctorImageBase64,
@@ -334,65 +332,19 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({
         icon4Base64,
       };
       
-      const response = await resultsAPI.generateResultImage(
+      // 서버 요청 전에 바로 HtmlCaptureScreen으로 이동 (로딩바가 즉시 보이도록)
+      const authToken = token || await AsyncStorage.getItem('authToken');
+      navigation.navigate('HtmlCapture', {
         petInfo,
         constitution,
-        requestData,
-        authToken
-      );
-
-      if (!response.success) {
-        throw new Error(response.message || '이미지 생성에 실패했습니다.');
-      }
-
-      // apiCall이 반환하는 구조 확인
-      const html = (response as any).html || (response as any).data?.html || response.data?.html;
-      const image = (response as any).image || (response as any).data?.image || response.data?.image;
-
-      // Base64 이미지가 있으면 저장
-      if (image) {
-        const base64Image = image;
-        const base64Data = base64Image.replace(/^data:image\/\w+;base64,/, '');
-        const filename = `pet-constitution-${Date.now()}.png`;
-        
-        const documentDir = FileSystem.documentDirectory;
-        if (!documentDir) {
-          throw new Error('파일 시스템에 접근할 수 없습니다.');
-        }
-        const fileUri = documentDir + filename;
-        
-        await FileSystem.writeAsStringAsync(fileUri, base64Data, {
-          encoding: FileSystem.EncodingType.Base64,
-        });
-
-        const asset = await MediaLibrary.createAssetAsync(fileUri);
-        await MediaLibrary.createAlbumAsync('반려동물 체질진단', asset, false);
-
-        Alert.alert('성공', '이미지가 갤러리에 저장되었습니다!');
-      } else if (html) {
-        // HTML만 반환된 경우 - WebView로 렌더링 후 캡처
-        console.log('HTML을 WebView로 렌더링하여 캡처합니다...');
-        const htmlKey = `html_capture_${Date.now()}`;
-        await AsyncStorage.setItem(htmlKey, html);
-        navigation.navigate('HtmlCapture', {
-          htmlKey: htmlKey,
-        });
-      } else {
-        throw new Error('이미지 또는 HTML 데이터를 받지 못했습니다.');
-      }
+        constitutionInfo: requestData,
+        token: authToken,
+      });
+      // 화면 이동 후 로딩 상태 해제 (HtmlCaptureScreen에서 로딩 처리)
+      setIsExporting(false);
     } catch (error: any) {
       console.error('Image export error:', error);
-      
-      let errorMessage = '이미지 저장 중 오류가 발생했습니다.';
-      
-      if (error.message.includes('Permission')) {
-        errorMessage = '갤러리 접근 권한이 필요합니다. 설정에서 권한을 허용해주세요.';
-      } else if (error.message.includes('Network')) {
-        errorMessage = '네트워크 연결을 확인해주세요.';
-      }
-      
-      Alert.alert('오류', errorMessage);
-    } finally {
+      Alert.alert('오류', '이미지 저장 중 오류가 발생했습니다.');
       setIsExporting(false);
     }
   };

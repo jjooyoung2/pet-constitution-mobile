@@ -13,6 +13,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { WebView } from 'react-native-webview';
 import * as MediaLibrary from 'expo-media-library';
 import * as FileSystem from 'expo-file-system/legacy';
+import { resultsAPI } from '../services/api';
 
 interface HtmlCaptureScreenProps {
   navigation: StackNavigationProp<any>;
@@ -22,19 +23,91 @@ interface HtmlCaptureScreenProps {
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 const HtmlCaptureScreen: React.FC<HtmlCaptureScreenProps> = ({ navigation, route }) => {
-  const { htmlKey, html: directHtml } = route.params || {};
+  const { htmlKey, html: directHtml, petInfo, constitution, constitutionInfo, token } = route.params || {};
   const webViewRef = useRef<WebView>(null);
   const [html, setHtml] = useState<string | null>(directHtml || null);
   const [isWebViewLoaded, setIsWebViewLoaded] = useState(false);
   const [isCapturing, setIsCapturing] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     const loadHtml = async () => {
+      // 직접 HTML이 전달된 경우
       if (directHtml) {
         setHtml(directHtml);
         return;
       }
 
+      // 서버에서 HTML을 가져와야 하는 경우 (petInfo, constitution, constitutionInfo가 있는 경우)
+      if (petInfo && constitution && constitutionInfo) {
+        setIsLoading(true);
+        try {
+          const response = await resultsAPI.generateResultImage(
+            petInfo,
+            constitution,
+            constitutionInfo,
+            token
+          );
+
+          if (!response.success) {
+            throw new Error(response.message || '이미지 생성에 실패했습니다.');
+          }
+
+          // apiCall이 반환하는 구조 확인
+          const responseHtml = (response as any).html || (response as any).data?.html || response.data?.html;
+          const responseImage = (response as any).image || (response as any).data?.image || response.data?.image;
+
+          // Base64 이미지가 있으면 저장 (서버에서 이미지 생성 성공)
+          if (responseImage) {
+            const base64Image = responseImage;
+            const base64Data = base64Image.replace(/^data:image\/\w+;base64,/, '');
+            const filename = `pet-constitution-${Date.now()}.png`;
+            
+            const documentDir = FileSystem.documentDirectory;
+            if (!documentDir) {
+              throw new Error('파일 시스템에 접근할 수 없습니다.');
+            }
+            const fileUri = documentDir + filename;
+            
+            await FileSystem.writeAsStringAsync(fileUri, base64Data, {
+              encoding: FileSystem.EncodingType.Base64,
+            });
+
+            const asset = await MediaLibrary.createAssetAsync(fileUri);
+            await MediaLibrary.createAlbumAsync('반려동물 체질진단', asset, false);
+
+            navigation.goBack();
+            setTimeout(() => {
+              Alert.alert('성공', '이미지가 갤러리에 저장되었습니다!');
+            }, 100);
+            return;
+          } else if (responseHtml) {
+            // HTML 반환된 경우
+            setHtml(responseHtml);
+          } else {
+            throw new Error('이미지 또는 HTML 데이터를 받지 못했습니다.');
+          }
+        } catch (error: any) {
+          console.error('Image export error:', error);
+          
+          let errorMessage = '이미지 저장 중 오류가 발생했습니다.';
+          
+          if (error.message.includes('Permission')) {
+            errorMessage = '갤러리 접근 권한이 필요합니다. 설정에서 권한을 허용해주세요.';
+          } else if (error.message.includes('Network')) {
+            errorMessage = '네트워크 연결을 확인해주세요.';
+          }
+          
+          Alert.alert('오류', errorMessage, [
+            { text: '확인', onPress: () => navigation.goBack() },
+          ]);
+        } finally {
+          setIsLoading(false);
+        }
+        return;
+      }
+
+      // AsyncStorage에서 HTML을 가져오는 경우 (기존 방식)
       if (htmlKey) {
         try {
           const storedHtml = await AsyncStorage.getItem(htmlKey);
@@ -61,7 +134,7 @@ const HtmlCaptureScreen: React.FC<HtmlCaptureScreenProps> = ({ navigation, route
     };
 
     loadHtml();
-  }, [htmlKey, directHtml, navigation]);
+  }, [htmlKey, directHtml, petInfo, constitution, constitutionInfo, token, navigation]);
 
   useEffect(() => {
     // WebView가 완전히 로드된 후에만 캡처
@@ -373,11 +446,11 @@ const HtmlCaptureScreen: React.FC<HtmlCaptureScreenProps> = ({ navigation, route
     }
   };
 
-  if (!html) {
+  if (!html || isLoading) {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#555" />
-        <Text style={styles.loadingText}>결과를 불러오는 중...</Text>
+        <Text style={styles.loadingText}>이미지 생성 중...</Text>
       </View>
     );
   }
