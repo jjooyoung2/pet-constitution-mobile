@@ -1,8 +1,8 @@
 import { createClient } from '@supabase/supabase-js';
 
-const API_BASE_URL = 'https://tbctjhfypfcjextmxaow.supabase.co/functions/v1';
-const SUPABASE_URL = 'https://tbctjhfypfcjextmxaow.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRiY3RqaGZ5cGZjamV4dG14YW93Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg4Njk0NTMsImV4cCI6MjA3NDQ0NTQ1M30.YHapmamp0zmXna-SVn__db4b2BNASh07NxI4NB5RKks';
+const API_BASE_URL = 'https://xpeyzdvtzdtzxxsgcsyf.supabase.co/functions/v1';
+const SUPABASE_URL = 'https://xpeyzdvtzdtzxxsgcsyf.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhwZXl6ZHZ0emR0enh4c2djc3lmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ5MjEzNTQsImV4cCI6MjA4MDQ5NzM1NH0.NfHYC4H9EWbMItKY2Q_GMbRmOHloq4lGi_rpxAKq5zA';
 
 // Supabase 클라이언트 생성
 export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);

@@ -178,7 +178,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation, route, onLogin, o
       }
       
       // prompt=login 파라미터 추가: 강제로 로그인 화면 표시 (이전 세션 무시)
-      const kakaoLoginUrl = `https://tbctjhfypfcjextmxaow.supabase.co/auth/v1/authorize?provider=kakao&redirect_to=${encodeURIComponent(redirectUrl)}&prompt=login`;
+      const kakaoLoginUrl = `https://xpeyzdvtzdtzxxsgcsyf.supabase.co/auth/v1/authorize?provider=kakao&redirect_to=${encodeURIComponent(redirectUrl)}&prompt=login`;
       console.log('카카오 로그인 URL:', kakaoLoginUrl);
       console.log('Redirect URL:', redirectUrl);
       
@@ -255,7 +255,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation, route, onLogin, o
       }
       
       // prompt=login 파라미터 추가: 강제로 로그인 화면 표시 (이전 세션 무시)
-      const googleLoginUrl = `https://tbctjhfypfcjextmxaow.supabase.co/auth/v1/authorize?provider=google&redirect_to=${encodeURIComponent(redirectUrl)}&prompt=login`;
+      const googleLoginUrl = `https://xpeyzdvtzdtzxxsgcsyf.supabase.co/auth/v1/authorize?provider=google&redirect_to=${encodeURIComponent(redirectUrl)}&prompt=login`;
       console.log('구글 로그인 URL:', googleLoginUrl);
       console.log('Redirect URL:', redirectUrl);
       

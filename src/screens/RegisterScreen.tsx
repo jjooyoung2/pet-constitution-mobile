@@ -26,7 +26,7 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation, onRegister 
     
     try {
       // 회원가입 플로우임을 명시 (action=signup)
-      const kakaoLoginUrl = `https://tbctjhfypfcjextmxaow.supabase.co/auth/v1/authorize?provider=kakao&redirect_to=exp://zbwfyuc-anonymous-8081.exp.direct/--/auth/callback?action=signup`;
+      const kakaoLoginUrl = `https://xpeyzdvtzdtzxxsgcsyf.supabase.co/auth/v1/authorize?provider=kakao&redirect_to=exp://zbwfyuc-anonymous-8081.exp.direct/--/auth/callback?action=signup`;
       console.log('카카오 회원가입 URL:', kakaoLoginUrl);
       
       const supported = await Linking.canOpenURL(kakaoLoginUrl);
@@ -51,7 +51,7 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation, onRegister 
     
     try {
       // 회원가입 플로우임을 명시 (action=signup)
-      const googleLoginUrl = `https://tbctjhfypfcjextmxaow.supabase.co/auth/v1/authorize?provider=google&redirect_to=exp://zbwfyuc-anonymous-8081.exp.direct/--/auth/callback?action=signup`;
+      const googleLoginUrl = `https://xpeyzdvtzdtzxxsgcsyf.supabase.co/auth/v1/authorize?provider=google&redirect_to=exp://zbwfyuc-anonymous-8081.exp.direct/--/auth/callback?action=signup`;
       console.log('구글 회원가입 URL:', googleLoginUrl);
       
       const supported = await Linking.canOpenURL(googleLoginUrl);
