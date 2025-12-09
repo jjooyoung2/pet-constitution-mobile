@@ -12,13 +12,29 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
+    "plugins": [
+      [
+        "expo-splash-screen",
+        {
+          "android": {
+            "image": "./assets/splash-icon.png",
+            "imageWidth": 288,
+            "resizeMode": "contain",
+            "backgroundColor": "#ffffff"
+          }
+        }
+      ]
+    ],
     "assetBundlePatterns": [
       "**/*"
     ],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.bjooyoung.petconstitutionmobile",
-      "icon": "./assets/icon-ios.png"
+      "icon": "./assets/icon-ios.png",
+      "infoPlist": {
+        "NSPhotoLibraryAddUsageDescription": "체질 진단 결과를 이미지로 저장하기 위해 갤러리 접근 권한이 필요합니다."
+      }
     },
     "android": {
       "adaptiveIcon": {
