@@ -17,8 +17,6 @@ import {
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { StackNavigationProp } from '@react-navigation/stack';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import * as MediaLibrary from 'expo-media-library';
-import * as FileSystem from 'expo-file-system/legacy';
 import { resultsAPI } from '../services/api';
 import { constitutionData } from '../data/constitutionData';
 import { globalStyles, scale, getFontFamily } from '../styles/globalStyles';
@@ -305,13 +303,7 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({
     try {
       console.log('이미지 내보내기 시작...');
       
-      // 권한 요청
-      const { status } = await MediaLibrary.requestPermissionsAsync();
-      if (status !== 'granted') {
-        Alert.alert('권한 필요', '갤러리에 저장하려면 권한이 필요합니다.');
-        setIsExporting(false);
-        return;
-      }
+      // 권한 요청은 HtmlCaptureScreen에서 처리
 
       // 체질 정보 가져오기
       const constitutionInfo = constitutionData[constitution] || constitutionData['목'];
