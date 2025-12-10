@@ -243,33 +243,74 @@ const HtmlCaptureScreen: React.FC<HtmlCaptureScreenProps> = ({ navigation, route
               // 스크롤을 맨 위로 이동
               window.scrollTo(0, 0);
               
+              // body/html 스타일 강제 설정 (높이 계산 정확도 향상)
+              body.style.overflow = 'visible';
+              html.style.overflow = 'visible';
+              
               // 고정 너비 사용 (1080px)
               const fixedWidth = 1080;
-              // 실제 콘텐츠 높이 계산
-              const contentHeight = Math.max(
-                body.scrollHeight || body.offsetHeight,
-                html.scrollHeight || html.offsetHeight,
-                body.clientHeight || html.clientHeight
+              
+              // 실제 콘텐츠 높이 계산 (더 정확하게)
+              // 모든 자식 요소의 실제 높이를 고려
+              let maxBottom = 0;
+              const allElements = body.querySelectorAll('*');
+              allElements.forEach(el => {
+                const rect = el.getBoundingClientRect();
+                const bottom = rect.bottom + window.scrollY;
+                if (bottom > maxBottom) {
+                  maxBottom = bottom;
+                }
+              });
+              
+              // 기존 방식과 새로운 방식 중 더 큰 값 사용 + 여유 패딩 추가
+              const fallbackHeight = Math.max(
+                body.scrollHeight || 0,
+                body.offsetHeight || 0,
+                html.scrollHeight || 0,
+                html.offsetHeight || 0,
+                body.clientHeight || 0,
+                html.clientHeight || 0
               );
               
-              html2canvas(body, {
-                backgroundColor: '#fff',
+              // 여유 패딩 150px 추가 (위아래 잘림 방지)
+              const contentHeight = Math.max(maxBottom, fallbackHeight) + 150;
+              
+              console.log('캡처 높이:', contentHeight, 'maxBottom:', maxBottom, 'fallback:', fallbackHeight);
+              
+              // body의 margin/padding 제거하여 정확한 캡처
+              const originalBodyMargin = body.style.margin;
+              const originalHtmlMargin = html.style.margin;
+              body.style.margin = '0';
+              html.style.margin = '0';
+              
+              html2canvas(html, {
+                backgroundColor: '#eee9e5',
                 scale: 1,
                 useCORS: true,
                 allowTaint: true,
                 width: fixedWidth,
-                height: contentHeight,
+                height: contentHeight + 50,
                 windowWidth: fixedWidth,
-                windowHeight: contentHeight,
+                windowHeight: contentHeight + 50,
                 x: 0,
-                y: 0,
+                y: -50,
                 scrollX: 0,
-                scrollY: 0,
-                logging: false,
-                imageTimeout: 30000, // 이미지 로딩 타임아웃 증가
+                scrollY: -50,
+                logging: true,
+                imageTimeout: 30000,
                 removeContainer: false,
-                foreignObjectRendering: false
+                foreignObjectRendering: false,
+                onclone: function(clonedDoc) {
+                  // 복제된 문서에서 margin/padding 조정
+                  clonedDoc.body.style.overflow = 'visible';
+                  clonedDoc.body.style.margin = '0';
+                  clonedDoc.documentElement.style.overflow = 'visible';
+                  clonedDoc.documentElement.style.margin = '0';
+                }
               }).then(canvas => {
+                // 원래 스타일 복원
+                body.style.margin = originalBodyMargin;
+                html.style.margin = originalHtmlMargin;
                 window.ReactNativeWebView.postMessage(JSON.stringify({
                   type: 'capture',
                   image: canvas.toDataURL('image/png', 1.0)
