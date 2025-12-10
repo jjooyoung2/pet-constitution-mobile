@@ -20,8 +20,8 @@
         "expo-splash-screen",
         {
           "android": {
-            "image": "./assets/splash-icon.png",
-            "resizeMode": "contain",
+            "image": "./assets/splash.png",
+            "imageWidth": 200,
             "backgroundColor": "#ffffff"
           }
         }
@@ -42,7 +42,7 @@
       },
       "splash": {
         "image": "./assets/splash.png",
-        "resizeMode": "contain",
+        "resizeMode": "cover",
         "backgroundColor": "#ffffff"
       },
       "package": "com.bjooyoung.petconstitutionmobile.dev",
