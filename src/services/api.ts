@@ -53,23 +53,22 @@ const apiCall = async <T = any>(endpoint: string, options: RequestInit = {}): Pr
     ...options,
   };
   
-  // Authorization 헤더가 없으면 에러 발생 (로그인/회원가입 제외)
-  console.log('Config headers:', config.headers);
-  console.log('Authorization header:', config.headers?.Authorization);
-  console.log('Request URL:', url);
-  
   // 로그인/회원가입/찾기/이미지생성 엔드포인트는 Authorization 헤더가 필요하지 않음 (게스트 모드 지원)
   const isAuthEndpoint = url.includes('/auth-login') || url.includes('/auth-register') || url.includes('/auth-find-id') || url.includes('/auth-find-password') || url.includes('/generate-result-image');
   
-  console.log('API Call Debug:', {
-    url,
-    isAuthEndpoint,
-    hasAuthHeader: !!(config.headers && config.headers.Authorization),
-    endpoint
-  });
+  if (__DEV__) {
+    console.log('API Call Debug:', {
+      url,
+      isAuthEndpoint,
+      hasAuthHeader: !!(config.headers && config.headers.Authorization),
+      endpoint
+    });
+  }
   
   if (!isAuthEndpoint && (!config.headers || !config.headers.Authorization)) {
-    console.error('Missing Authorization header in config:', config);
+    if (__DEV__) {
+      console.error('Missing Authorization header in config');
+    }
     throw new Error('Authorization header is required');
   }
 
@@ -78,10 +77,9 @@ const apiCall = async <T = any>(endpoint: string, options: RequestInit = {}): Pr
   const timeoutId = setTimeout(() => controller.abort(), 30000);
   
   try {
-    console.log('API Request:', { url, config });
-    console.log('Request URL:', url);
-    console.log('Request method:', config.method || 'GET');
-    console.log('Request headers:', config.headers);
+    if (__DEV__) {
+      console.log('API Request:', { url, method: config.method || 'GET' });
+    }
     
     const response = await fetch(url, {
       ...config,
@@ -90,32 +88,35 @@ const apiCall = async <T = any>(endpoint: string, options: RequestInit = {}): Pr
     
     clearTimeout(timeoutId);
     
-    console.log('Response status:', response.status);
-    console.log('Response headers:', response.headers);
-    console.log('Response ok:', response.ok);
-    
     // 응답 텍스트를 먼저 가져옴
     const responseText = await response.text();
-    console.log('Response text (first 200 chars):', responseText.substring(0, 200));
+    
+    if (__DEV__) {
+      console.log('Response status:', response.status, 'ok:', response.ok);
+    }
     
     // JSON 파싱 시도
     let data;
     try {
       data = JSON.parse(responseText);
     } catch (parseError) {
-      console.error('JSON Parse Error:', parseError);
-      console.error('Response was not valid JSON. Response text:', responseText.substring(0, 500));
+      if (__DEV__) {
+        console.error('JSON Parse Error:', parseError);
+        console.error('Response was not valid JSON. Response text:', responseText.substring(0, 500));
+      }
       // HTML 에러 페이지인 경우 적절한 에러 메시지 반환
       if (responseText.includes('<!DOCTYPE') || responseText.includes('<html')) {
         throw new Error('서버에서 예상치 못한 응답을 반환했습니다. 잠시 후 다시 시도해주세요.');
       }
       throw new Error('서버 응답을 처리할 수 없습니다.');
     }
-    console.log('API Response:', { status: response.status, data });
     
-    // 디버깅을 위한 추가 로그
-    if (data.data && data.data.debug) {
-      console.log('DEBUG INFO:', data.data.debug);
+    if (__DEV__) {
+      console.log('API Response:', { status: response.status, success: data.success });
+      // 디버깅을 위한 추가 로그
+      if (data.data && data.data.debug) {
+        console.log('DEBUG INFO:', data.data.debug);
+      }
     }
     
     if (!response.ok) {
@@ -123,22 +124,20 @@ const apiCall = async <T = any>(endpoint: string, options: RequestInit = {}): Pr
     }
     
     return data;
-  } catch (error) {
+  } catch (error: any) {
     clearTimeout(timeoutId);
-    console.error('API Error:', error);
-    console.error('Error details:', error.message);
-    console.error('Error stack:', error.stack);
-    console.error('Error name:', error.name);
     
-    // 네트워크 오류인 경우 더 자세한 정보 제공
-    if (error.message === 'Network request failed' || error.name === 'AbortError') {
-      console.error('Network request failed - possible causes:');
-      console.error('1. Server is down or unreachable');
-      console.error('2. Network connectivity issues');
-      console.error('3. CORS issues');
-      console.error('4. SSL/TLS certificate problems');
-      console.error('5. Request timeout (10초 초과)');
-      console.error('6. Expo Go network restrictions');
+    if (__DEV__) {
+      console.error('API Error:', error.message || error);
+      // 네트워크 오류인 경우 더 자세한 정보 제공
+      if (error.message === 'Network request failed' || error.name === 'AbortError') {
+        console.error('Network request failed - possible causes:');
+        console.error('1. Server is down or unreachable');
+        console.error('2. Network connectivity issues');
+        console.error('3. CORS issues');
+        console.error('4. SSL/TLS certificate problems');
+        console.error('5. Request timeout (30초 초과)');
+      }
     }
     
     throw error;
@@ -265,13 +264,13 @@ export const resultsAPI = {
 
   // 이메일로 식단 전송
   sendDietEmail: async (resultId: string, email: string, token: string): Promise<ApiResponse<{ message: string }>> => {
-    console.log('=== API SEND EMAIL DEBUG ===');
-    console.log('resultId:', resultId);
-    console.log('email:', email);
-    console.log('token length:', token ? token.length : 0);
+    if (__DEV__) {
+      console.log('=== API SEND EMAIL DEBUG ===');
+      console.log('resultId:', resultId);
+      console.log('email:', email);
+    }
     
     const requestBody = { resultId, email };
-    console.log('Request body:', requestBody);
     
     return apiCall<{ message: string }>('/email-send', {
       method: 'POST',

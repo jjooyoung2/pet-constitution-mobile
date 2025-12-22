@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "반려동물 체질진단",
+    "name": "온솔 반려동물 체질 검사",
     "slug": "pet-constitution-mobile",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -29,7 +29,7 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.bjooyoung.petconstitutionmobile",
+      "bundleIdentifier": "com.onsol.petconstitutionmobile",
       "icon": "./assets/icon-ios.png",
       "infoPlist": {
         "NSPhotoLibraryAddUsageDescription": "체질 진단 결과를 이미지로 저장하기 위해 갤러리 접근 권한이 필요합니다."
@@ -45,7 +45,7 @@
         "resizeMode": "cover",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.bjooyoung.petconstitutionmobile.dev",
+      "package": "com.onsol.petconstitutionmobile",
       "minSdkVersion": 21,
       "intentFilters": [
         {

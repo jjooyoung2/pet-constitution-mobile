@@ -317,16 +317,6 @@ const MyPageScreen: React.FC<MyPageScreenProps> = ({
       setShowWithdrawCompleteModal(true);
       setIsWithdrawing(false);
       
-      // 2초 후 자동으로 로그아웃 처리
-      setTimeout(() => {
-        setShowWithdrawCompleteModal(false);
-        onLogout();
-        navigation.reset({
-          index: 0,
-          routes: [{ name: 'Start' }],
-        });
-      }, 2000);
-      
     } catch (error) {
       console.error('탈퇴 오류:', error);
       Alert.alert('오류', '탈퇴 처리 중 오류가 발생했습니다.');
@@ -480,6 +470,25 @@ const MyPageScreen: React.FC<MyPageScreenProps> = ({
                 <Text style={styles.modalConfirmButtonText}>탈퇴하기</Text>
               </TouchableOpacity>
             </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* 탈퇴 처리 중 로딩 모달 */}
+      <Modal
+        visible={isWithdrawing}
+        transparent={true}
+        animationType="fade"
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContainer}>
+            <ActivityIndicator size="large" color="#5b6751" style={styles.loadingIndicator} />
+            <Text style={styles.modalTitle}>
+              탈퇴 처리 중...
+            </Text>
+            <Text style={styles.modalText}>
+              잠시만 기다려주세요.
+            </Text>
           </View>
         </View>
       </Modal>
@@ -749,6 +758,9 @@ const styles = StyleSheet.create({
     borderWidth: scale(3),
     borderColor: '#2d3a28',
     width: scale(700),
+  },
+  loadingIndicator: {
+    marginBottom: scale(40),
   },
   modalTitle: {
     fontSize: scale(53),

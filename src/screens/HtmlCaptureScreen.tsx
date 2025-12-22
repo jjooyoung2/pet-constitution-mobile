@@ -13,6 +13,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { WebView } from 'react-native-webview';
 import * as MediaLibrary from 'expo-media-library';
 import * as FileSystem from 'expo-file-system/legacy';
+import Constants from 'expo-constants';
 import { resultsAPI } from '../services/api';
 
 interface HtmlCaptureScreenProps {
@@ -378,8 +379,9 @@ const HtmlCaptureScreen: React.FC<HtmlCaptureScreenProps> = ({ navigation, route
         }
         // 3. Android 외부 저장소 경로 직접 시도
         else if (Platform.OS === 'android') {
-          // Android의 외부 캐시 디렉토리
-          const androidCachePath = '/storage/emulated/0/Android/data/com.bjooyoung.petconstitutionmobile.dev/cache/';
+          // Android의 외부 캐시 디렉토리 (동적으로 패키지명 가져오기)
+          const packageName = Constants.expoConfig?.android?.package || 'com.onsol.petconstitutionmobile';
+          const androidCachePath = `/storage/emulated/0/Android/data/${packageName}/cache/`;
           fileUri = androidCachePath + filename;
           console.log('HtmlCaptureScreen - Android 직접 경로 사용:', fileUri);
         }
