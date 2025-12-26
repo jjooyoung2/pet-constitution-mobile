@@ -13,7 +13,6 @@ import {
 import { StackNavigationProp } from '@react-navigation/stack';
 import { Linking, Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { scale, fonts, getFontFamily } from '../styles/globalStyles';
 
 interface LoginScreenProps {
@@ -27,7 +26,6 @@ interface LoginScreenProps {
 }
 
 const LoginScreen: React.FC<LoginScreenProps> = ({ navigation, route, onLogin, onRegister, onFindId, onFindPassword, onOAuthCallback }) => {
-  const insets = useSafeAreaInsets();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [nickname, setNickname] = useState('');
@@ -35,10 +33,8 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation, route, onLogin, o
   const [isLoading, setIsLoading] = useState(false);
   const slideAnim = useRef(new Animated.Value(300)).current; // 시작 위치를 화면 아래로
   const oauthTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const isMountedRef = useRef(true); // 마운트 상태 추적
 
   useEffect(() => {
-    isMountedRef.current = true;
     // 모달이 나타날 때 애니메이션
     Animated.spring(slideAnim, {
       toValue: 0,
@@ -49,20 +45,16 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation, route, onLogin, o
     
     // 딥링크 리스너: OAuth 콜백이 돌아오면 로딩 상태 해제
     const handleDeepLink = (url: string) => {
-      if (__DEV__) {
-        console.log('🔗 LoginScreen: Deep link received:', url);
-      }
+      console.log('🔗 LoginScreen: Deep link received:', url);
       if (url.includes('auth/callback') || url.includes('petconstitution://')) {
-        if (__DEV__) {
-          console.log('✅ LoginScreen: OAuth callback detected, clearing loading state');
-        }
+        console.log('✅ LoginScreen: OAuth callback detected, clearing loading state');
         setIsLoading(false);
         // 타임아웃 클리어
         if (oauthTimeoutRef.current) {
           clearTimeout(oauthTimeoutRef.current);
           oauthTimeoutRef.current = null;
         }
-      } else if (__DEV__) {
+      } else {
         console.log('⚠️ LoginScreen: Deep link received but not an OAuth callback');
       }
     };
@@ -79,13 +71,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation, route, onLogin, o
     });
     
     return () => {
-      isMountedRef.current = false; // 언마운트 표시
       linkingListener?.remove();
-      // 컴포넌트 언마운트 시 OAuth 타임아웃 클리어
-      if (oauthTimeoutRef.current) {
-        clearTimeout(oauthTimeoutRef.current);
-        oauthTimeoutRef.current = null;
-      }
     };
   }, []);
 
@@ -168,9 +154,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation, route, onLogin, o
   };
 
   const handleKakaoLogin = async () => {
-    if (__DEV__) {
-      console.log('=== 카카오 로그인 시작 ===');
-    }
+    console.log('=== 카카오 로그인 시작 ===');
     setIsLoading(true);
     
     try {
@@ -184,12 +168,9 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation, route, onLogin, o
       }
       
       // prompt=login 파라미터 추가: 강제로 로그인 화면 표시 (이전 세션 무시)
-      const kakaoLoginUrl = `https://xpeyzdvtzdtzxxsgcsyf.supabase.co/auth/v1/authorize?provider=kakao&redirect_to=${encodeURIComponent(redirectUrl)}&prompt=login`;
-      
-      if (__DEV__) {
-        console.log('카카오 로그인 URL:', kakaoLoginUrl);
-        console.log('Redirect URL:', redirectUrl);
-      }
+      const kakaoLoginUrl = `https://tbctjhfypfcjextmxaow.supabase.co/auth/v1/authorize?provider=kakao&redirect_to=${encodeURIComponent(redirectUrl)}&prompt=login`;
+      console.log('카카오 로그인 URL:', kakaoLoginUrl);
+      console.log('Redirect URL:', redirectUrl);
       
       if (Platform.OS === 'web') {
         window.location.href = kakaoLoginUrl;
@@ -198,51 +179,65 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation, route, onLogin, o
         try {
           // URL이 열 수 있는지 확인
           const canOpen = await Linking.canOpenURL(kakaoLoginUrl);
+          console.log('Can open Kakao URL:', canOpen);
           
           if (canOpen) {
-            if (__DEV__) {
-              console.log('Opening Kakao login URL with Linking...');
-            }
+            console.log('Opening Kakao login URL with Linking...');
+            console.log('URL to open:', kakaoLoginUrl);
             
             try {
-              await Linking.openURL(kakaoLoginUrl);
-              if (__DEV__) {
-                console.log('✅ 카카오 로그인 브라우저 열림 - 딥링크 대기 중...');
+              console.log('🔗 Attempting to open URL with Linking.openURL...');
+              const opened = await Linking.openURL(kakaoLoginUrl);
+              console.log('✅ Linking.openURL completed successfully');
+              console.log('🔗 Return value:', opened);
+              
+              // 실제 디바이스에서 브라우저가 열렸는지 확인을 위한 추가 로그
+              console.log('📱 Platform:', Platform.OS);
+              console.log('📱 Waiting for deep link callback...');
+              
+              // 타임아웃 설정 (딥링크가 돌아올 때까지 대기)
+              if (oauthTimeoutRef.current) {
+                clearTimeout(oauthTimeoutRef.current);
               }
+              oauthTimeoutRef.current = setTimeout(() => {
+                console.log('⏰ OAuth timeout - no deep link received after 30 seconds');
+                console.log('⚠️ This might mean:');
+                console.log('   1. Browser did not open');
+                console.log('   2. Deep link is not configured correctly');
+                console.log('   3. Supabase redirect is not working');
+                setIsLoading(false);
+                Alert.alert(
+                  '로그인 시간 초과',
+                  '로그인 처리가 완료되지 않았습니다. 브라우저가 열렸는지 확인해주세요.',
+                  [{ text: '확인' }]
+                );
+              }, 30000);
             } catch (linkError) {
-              if (__DEV__) {
-                console.error('❌ Failed to open URL with Linking:', linkError);
-              }
+              console.error('❌ Failed to open URL with Linking:', linkError);
               setIsLoading(false);
               Alert.alert('오류', '카카오 로그인 페이지를 열 수 없습니다.');
             }
           } else {
             // 직접 브라우저로 열기 시도
-            if (__DEV__) {
-              console.log('CanOpenURL returned false, trying to open anyway...');
-            }
+            console.log('CanOpenURL returned false, trying to open anyway...');
             try {
-              await Linking.openURL(kakaoLoginUrl);
+              const opened = await Linking.openURL(kakaoLoginUrl);
+              console.log('Linking.openURL result (fallback):', opened);
             } catch (openError) {
-              if (__DEV__) {
-                console.error('Failed to open URL:', openError);
-              }
+              console.error('Failed to open URL:', openError);
               setIsLoading(false);
               Alert.alert('오류', '카카오 로그인 페이지를 열 수 없습니다. 브라우저를 확인해주세요.');
             }
           }
         } catch (error) {
-          if (__DEV__) {
-            console.error('카카오 로그인 오류:', error);
-          }
+          console.error('카카오 로그인 오류:', error);
           setIsLoading(false);
           Alert.alert('오류', '카카오 로그인 중 오류가 발생했습니다: ' + (error instanceof Error ? error.message : String(error)));
         }
       }
     } catch (error) {
-      if (__DEV__) {
-        console.error('에러:', error);
-      }
+      const message = error instanceof Error ? error.message : String(error);
+      console.error('에러:', error);
       setIsLoading(false);
       Alert.alert('오류', '카카오 로그인 중 오류가 발생했습니다.');
     }
@@ -250,9 +245,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation, route, onLogin, o
   };
 
   const handleGoogleLogin = async () => {
-    if (__DEV__) {
-      console.log('=== 구글 로그인 시작 ===');
-    }
+    console.log('=== 구글 로그인 시작 ===');
     setIsLoading(true);
     
     try {
@@ -266,12 +259,9 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation, route, onLogin, o
       }
       
       // prompt=login 파라미터 추가: 강제로 로그인 화면 표시 (이전 세션 무시)
-      const googleLoginUrl = `https://xpeyzdvtzdtzxxsgcsyf.supabase.co/auth/v1/authorize?provider=google&redirect_to=${encodeURIComponent(redirectUrl)}&prompt=login`;
-      
-      if (__DEV__) {
-        console.log('구글 로그인 URL:', googleLoginUrl);
-        console.log('Redirect URL:', redirectUrl);
-      }
+      const googleLoginUrl = `https://tbctjhfypfcjextmxaow.supabase.co/auth/v1/authorize?provider=google&redirect_to=${encodeURIComponent(redirectUrl)}&prompt=login`;
+      console.log('구글 로그인 URL:', googleLoginUrl);
+      console.log('Redirect URL:', redirectUrl);
       
       if (Platform.OS === 'web') {
         window.location.href = googleLoginUrl;
@@ -280,51 +270,55 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation, route, onLogin, o
         try {
           // URL이 열 수 있는지 확인
           const canOpen = await Linking.canOpenURL(googleLoginUrl);
+          console.log('Can open Google URL:', canOpen);
           
           if (canOpen) {
-            if (__DEV__) {
-              console.log('Opening Google login URL with Linking...');
-            }
+            console.log('Opening Google login URL with Linking...');
+            console.log('URL to open:', googleLoginUrl);
             
             try {
               await Linking.openURL(googleLoginUrl);
-              if (__DEV__) {
-                console.log('✅ 구글 로그인 브라우저 열림 - 딥링크 대기 중...');
+              console.log('Linking.openURL completed successfully');
+              
+              // 타임아웃 설정 (딥링크가 돌아올 때까지 대기)
+              if (oauthTimeoutRef.current) {
+                clearTimeout(oauthTimeoutRef.current);
               }
+              oauthTimeoutRef.current = setTimeout(() => {
+                console.log('OAuth timeout - no deep link received after 30 seconds');
+                setIsLoading(false);
+                Alert.alert(
+                  '로그인 시간 초과',
+                  '로그인 처리가 완료되지 않았습니다.',
+                  [{ text: '확인' }]
+                );
+              }, 30000);
             } catch (linkError) {
-              if (__DEV__) {
-                console.error('Failed to open URL with Linking:', linkError);
-              }
+              console.error('Failed to open URL with Linking:', linkError);
               setIsLoading(false);
               Alert.alert('오류', '구글 로그인 페이지를 열 수 없습니다.');
             }
           } else {
             // 직접 브라우저로 열기 시도
-            if (__DEV__) {
-              console.log('CanOpenURL returned false, trying to open anyway...');
-            }
+            console.log('CanOpenURL returned false, trying to open anyway...');
             try {
-              await Linking.openURL(googleLoginUrl);
+              const opened = await Linking.openURL(googleLoginUrl);
+              console.log('Linking.openURL result (fallback):', opened);
             } catch (openError) {
-              if (__DEV__) {
-                console.error('Failed to open URL:', openError);
-              }
+              console.error('Failed to open URL:', openError);
               setIsLoading(false);
               Alert.alert('오류', '구글 로그인 페이지를 열 수 없습니다. 브라우저를 확인해주세요.');
             }
           }
         } catch (error) {
-          if (__DEV__) {
-            console.error('구글 로그인 오류:', error);
-          }
+          console.error('구글 로그인 오류:', error);
           setIsLoading(false);
           Alert.alert('오류', '구글 로그인 중 오류가 발생했습니다: ' + (error instanceof Error ? error.message : String(error)));
         }
       }
     } catch (error) {
-      if (__DEV__) {
-        console.error('에러:', error);
-      }
+      const message = error instanceof Error ? error.message : String(error);
+      console.error('에러:', error);
       setIsLoading(false);
       Alert.alert('오류', '구글 로그인 중 오류가 발생했습니다.');
     }
@@ -371,7 +365,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation, route, onLogin, o
         ]}
       >
         {/* 하단: 흰색 배경 + 로그인 버튼 */}
-        <View style={[styles.bottomSection, { paddingBottom: styles.bottomSection.paddingBottom + insets.bottom }]}>
+        <View style={styles.bottomSection}>
           {/* 카카오 로그인 버튼 */}
           <TouchableOpacity
             style={[styles.socialButton, isLoading && styles.disabledButton]}

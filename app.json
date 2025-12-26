@@ -28,8 +28,8 @@
       ]
     ],
     "ios": {
-      "supportsTablet": true,
-      "bundleIdentifier": "com.onsol.petconstitutionmobile",
+      "supportsTablet": false,
+      "bundleIdentifier": "com.onsolyanghanbong.petconstitution",
       "icon": "./assets/icon-ios.png",
       "infoPlist": {
         "NSPhotoLibraryAddUsageDescription": "체질 진단 결과를 이미지로 저장하기 위해 갤러리 접근 권한이 필요합니다."

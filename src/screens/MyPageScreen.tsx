@@ -309,13 +309,31 @@ const MyPageScreen: React.FC<MyPageScreenProps> = ({
         throw new Error(response.message || '탈퇴 처리에 실패했습니다.');
       }
       
+      // 로딩 해제
+      setIsWithdrawing(false);
+      
       // 로컬 데이터 삭제
       await AsyncStorage.removeItem('authToken');
       await AsyncStorage.removeItem('refreshToken');
       
-      // 완료 모달 표시
-      setShowWithdrawCompleteModal(true);
-      setIsWithdrawing(false);
+      // 완료 알림 (iOS/Android 공통)
+      Alert.alert(
+        '탈퇴 완료',
+        '탈퇴가 완료되었습니다.\n그동안 이용해 주셔서 감사합니다.',
+        [
+          {
+            text: '확인',
+            onPress: () => {
+              onLogout();
+              navigation.reset({
+                index: 0,
+                routes: [{ name: 'Start' }],
+              });
+            }
+          }
+        ],
+        { cancelable: false }
+      );
       
     } catch (error) {
       console.error('탈퇴 오류:', error);
