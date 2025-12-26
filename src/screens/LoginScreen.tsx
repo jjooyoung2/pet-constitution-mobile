@@ -13,6 +13,7 @@ import {
 import { StackNavigationProp } from '@react-navigation/stack';
 import { Linking, Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { scale, fonts, getFontFamily } from '../styles/globalStyles';
 
 interface LoginScreenProps {
@@ -26,6 +27,7 @@ interface LoginScreenProps {
 }
 
 const LoginScreen: React.FC<LoginScreenProps> = ({ navigation, route, onLogin, onRegister, onFindId, onFindPassword, onOAuthCallback }) => {
+  const insets = useSafeAreaInsets();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [nickname, setNickname] = useState('');
@@ -33,8 +35,10 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation, route, onLogin, o
   const [isLoading, setIsLoading] = useState(false);
   const slideAnim = useRef(new Animated.Value(300)).current; // 시작 위치를 화면 아래로
   const oauthTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const isMountedRef = useRef(true); // 마운트 상태 추적
 
   useEffect(() => {
+    isMountedRef.current = true;
     // 모달이 나타날 때 애니메이션
     Animated.spring(slideAnim, {
       toValue: 0,
@@ -71,7 +75,13 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation, route, onLogin, o
     });
     
     return () => {
+      isMountedRef.current = false; // 언마운트 표시
       linkingListener?.remove();
+      // 컴포넌트 언마운트 시 OAuth 타임아웃 클리어
+      if (oauthTimeoutRef.current) {
+        clearTimeout(oauthTimeoutRef.current);
+        oauthTimeoutRef.current = null;
+      }
     };
   }, []);
 
@@ -168,7 +178,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation, route, onLogin, o
       }
       
       // prompt=login 파라미터 추가: 강제로 로그인 화면 표시 (이전 세션 무시)
-      const kakaoLoginUrl = `https://tbctjhfypfcjextmxaow.supabase.co/auth/v1/authorize?provider=kakao&redirect_to=${encodeURIComponent(redirectUrl)}&prompt=login`;
+      const kakaoLoginUrl = `https://xpeyzdvtzdtzxxsgcsyf.supabase.co/auth/v1/authorize?provider=kakao&redirect_to=${encodeURIComponent(redirectUrl)}&prompt=login`;
       console.log('카카오 로그인 URL:', kakaoLoginUrl);
       console.log('Redirect URL:', redirectUrl);
       
@@ -195,23 +205,9 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation, route, onLogin, o
               console.log('📱 Platform:', Platform.OS);
               console.log('📱 Waiting for deep link callback...');
               
-              // 타임아웃 설정 (딥링크가 돌아올 때까지 대기)
-              if (oauthTimeoutRef.current) {
-                clearTimeout(oauthTimeoutRef.current);
-              }
-              oauthTimeoutRef.current = setTimeout(() => {
-                console.log('⏰ OAuth timeout - no deep link received after 30 seconds');
-                console.log('⚠️ This might mean:');
-                console.log('   1. Browser did not open');
-                console.log('   2. Deep link is not configured correctly');
-                console.log('   3. Supabase redirect is not working');
-                setIsLoading(false);
-                Alert.alert(
-                  '로그인 시간 초과',
-                  '로그인 처리가 완료되지 않았습니다. 브라우저가 열렸는지 확인해주세요.',
-                  [{ text: '확인' }]
-                );
-              }, 30000);
+              // 타임아웃 제거 - OAuth 콜백이 확실히 처리되므로 불필요
+              // 브라우저가 열리면 사용자가 직접 로그인하고 돌아오므로 타임아웃 불필요
+              console.log('📱 카카오 로그인 브라우저 열림 - 딥링크 대기 중...');
             } catch (linkError) {
               console.error('❌ Failed to open URL with Linking:', linkError);
               setIsLoading(false);
@@ -259,7 +255,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation, route, onLogin, o
       }
       
       // prompt=login 파라미터 추가: 강제로 로그인 화면 표시 (이전 세션 무시)
-      const googleLoginUrl = `https://tbctjhfypfcjextmxaow.supabase.co/auth/v1/authorize?provider=google&redirect_to=${encodeURIComponent(redirectUrl)}&prompt=login`;
+      const googleLoginUrl = `https://xpeyzdvtzdtzxxsgcsyf.supabase.co/auth/v1/authorize?provider=google&redirect_to=${encodeURIComponent(redirectUrl)}&prompt=login`;
       console.log('구글 로그인 URL:', googleLoginUrl);
       console.log('Redirect URL:', redirectUrl);
       
@@ -280,19 +276,9 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation, route, onLogin, o
               await Linking.openURL(googleLoginUrl);
               console.log('Linking.openURL completed successfully');
               
-              // 타임아웃 설정 (딥링크가 돌아올 때까지 대기)
-              if (oauthTimeoutRef.current) {
-                clearTimeout(oauthTimeoutRef.current);
-              }
-              oauthTimeoutRef.current = setTimeout(() => {
-                console.log('OAuth timeout - no deep link received after 30 seconds');
-                setIsLoading(false);
-                Alert.alert(
-                  '로그인 시간 초과',
-                  '로그인 처리가 완료되지 않았습니다.',
-                  [{ text: '확인' }]
-                );
-              }, 30000);
+              // 타임아웃 제거 - OAuth 콜백이 확실히 처리되므로 불필요
+              // 브라우저가 열리면 사용자가 직접 로그인하고 돌아오므로 타임아웃 불필요
+              console.log('📱 구글 로그인 브라우저 열림 - 딥링크 대기 중...');
             } catch (linkError) {
               console.error('Failed to open URL with Linking:', linkError);
               setIsLoading(false);
@@ -365,7 +351,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation, route, onLogin, o
         ]}
       >
         {/* 하단: 흰색 배경 + 로그인 버튼 */}
-        <View style={styles.bottomSection}>
+        <View style={[styles.bottomSection, { paddingBottom: styles.bottomSection.paddingBottom + insets.bottom }]}>
           {/* 카카오 로그인 버튼 */}
           <TouchableOpacity
             style={[styles.socialButton, isLoading && styles.disabledButton]}
