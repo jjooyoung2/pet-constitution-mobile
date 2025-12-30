@@ -164,6 +164,38 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation, route, onLogin, o
     setNickname('');
   };
 
+  // URL에서 토큰 추출 후 Supabase 세션 설정
+  const handleOAuthResult = async (url: string) => {
+    try {
+      const hashIndex = url.indexOf('#');
+      if (hashIndex === -1) return false;
+      
+      const hashFragment = url.substring(hashIndex + 1);
+      const params = new URLSearchParams(hashFragment);
+      const accessToken = params.get('access_token');
+      const refreshToken = params.get('refresh_token');
+      
+      if (accessToken && refreshToken) {
+        const { supabase } = require('../services/api');
+        const { error } = await supabase.auth.setSession({
+          access_token: accessToken,
+          refresh_token: refreshToken,
+        });
+        
+        if (error) {
+          console.error('세션 설정 오류:', error);
+          return false;
+        }
+        console.log('✅ Supabase 세션 설정 완료');
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error('OAuth 결과 처리 오류:', error);
+      return false;
+    }
+  };
+
   const handleKakaoLogin = async () => {
     console.log('=== 카카오 로그인 시작 ===');
     setIsLoading(true);
@@ -185,9 +217,11 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation, route, onLogin, o
         console.log('WebBrowser result:', result);
         
         if (result.type === 'success' && result.url) {
-          // OAuth 콜백 처리
-          if (onOAuthCallback) {
-            await onOAuthCallback(result.url);
+          // Supabase 세션 직접 설정 (onAuthStateChange가 처리)
+          const success = await handleOAuthResult(result.url);
+          if (success) {
+            // 로그인 성공 시 모달 닫기
+            navigation.goBack();
           }
         } else if (result.type === 'cancel') {
           console.log('사용자가 로그인을 취소했습니다.');
@@ -222,9 +256,11 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation, route, onLogin, o
         console.log('WebBrowser result:', result);
         
         if (result.type === 'success' && result.url) {
-          // OAuth 콜백 처리
-          if (onOAuthCallback) {
-            await onOAuthCallback(result.url);
+          // Supabase 세션 직접 설정 (onAuthStateChange가 처리)
+          const success = await handleOAuthResult(result.url);
+          if (success) {
+            // 로그인 성공 시 모달 닫기
+            navigation.goBack();
           }
         } else if (result.type === 'cancel') {
           console.log('사용자가 로그인을 취소했습니다.');
@@ -489,7 +525,7 @@ const styles = StyleSheet.create({
   socialButton: {
     backgroundColor: '#f7e31e',
     paddingVertical: scale(55),
-    paddingHorizontal: scale(20),
+    paddingHorizontal: scale(15),
     paddingLeft: scale(80), // 아이콘 공간 확보
     borderRadius: scale(15),
     alignItems: 'center',
@@ -519,11 +555,11 @@ const styles = StyleSheet.create({
   },
   appleButton: {
     width: '100%',
-    height: scale(130),
+    height: scale(140),
   },
   socialButtonText: {
     color: '#0e0e0e',
-    fontSize: scale(40),
+    fontSize: scale(42),
     textAlign: 'center',
     fontFamily: getFontFamily('extraBold'),
   },
