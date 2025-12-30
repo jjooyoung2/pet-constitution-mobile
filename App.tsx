@@ -62,6 +62,31 @@ export default function App() {
   useEffect(() => {
     checkAuthStatus();
     
+    // Supabase 세션 변경 리스너 (Apple 로그인 등)
+    const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log('🔐 Auth state changed:', event);
+      if (event === 'SIGNED_IN' && session) {
+        console.log('🔐 User signed in via Supabase');
+        // AsyncStorage에 토큰 저장
+        await AsyncStorage.setItem('authToken', session.access_token);
+        if (session.refresh_token) {
+          await AsyncStorage.setItem('refreshToken', session.refresh_token);
+        }
+        // 사용자 정보 업데이트
+        const response = await authAPI.getMe(session.access_token);
+        if (response.success && response.data) {
+          setIsLoggedIn(true);
+          setUser(response.data.user);
+        }
+      } else if (event === 'SIGNED_OUT') {
+        console.log('🔐 User signed out');
+        await AsyncStorage.removeItem('authToken');
+        await AsyncStorage.removeItem('refreshToken');
+        setIsLoggedIn(false);
+        setUser(null);
+      }
+    });
+    
     // OAuth 콜백 처리
     const handleDeepLink = (url: string) => {
       console.log('=== Deep link received ===');
@@ -119,6 +144,7 @@ export default function App() {
 
     return () => {
       linkingListener?.remove();
+      authListener?.subscription?.unsubscribe();
     };
   }, []);
 

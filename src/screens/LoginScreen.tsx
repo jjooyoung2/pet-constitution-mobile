@@ -15,6 +15,8 @@ import { Linking, Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { scale, fonts, getFontFamily } from '../styles/globalStyles';
+import * as WebBrowser from 'expo-web-browser';
+import * as AppleAuthentication from 'expo-apple-authentication';
 
 interface LoginScreenProps {
   navigation: StackNavigationProp<any>;
@@ -27,7 +29,6 @@ interface LoginScreenProps {
 }
 
 const LoginScreen: React.FC<LoginScreenProps> = ({ navigation, route, onLogin, onRegister, onFindId, onFindPassword, onOAuthCallback }) => {
-  const insets = useSafeAreaInsets();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [nickname, setNickname] = useState('');
@@ -168,76 +169,36 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation, route, onLogin, o
     setIsLoading(true);
     
     try {
-      // 웹과 모바일에서 다른 redirect URL 사용
-      let redirectUrl;
-      if (Platform.OS === 'web') {
-        redirectUrl = `${window.location.origin}/auth/callback`;
-      } else {
-        // 개발 빌드에서는 커스텀 scheme 사용 (action 파라미터 제거)
-        redirectUrl = 'petconstitution://auth/callback';
-      }
-      
-      // prompt=login 파라미터 추가: 강제로 로그인 화면 표시 (이전 세션 무시)
+      const redirectUrl = 'petconstitution://auth/callback';
       const kakaoLoginUrl = `https://xpeyzdvtzdtzxxsgcsyf.supabase.co/auth/v1/authorize?provider=kakao&redirect_to=${encodeURIComponent(redirectUrl)}&prompt=login`;
       console.log('카카오 로그인 URL:', kakaoLoginUrl);
-      console.log('Redirect URL:', redirectUrl);
       
       if (Platform.OS === 'web') {
         window.location.href = kakaoLoginUrl;
       } else {
-        // Linking으로 열기 (카카오 앱이 있으면 앱으로, 없으면 브라우저로)
-        try {
-          // URL이 열 수 있는지 확인
-          const canOpen = await Linking.canOpenURL(kakaoLoginUrl);
-          console.log('Can open Kakao URL:', canOpen);
-          
-          if (canOpen) {
-            console.log('Opening Kakao login URL with Linking...');
-            console.log('URL to open:', kakaoLoginUrl);
-            
-            try {
-              console.log('🔗 Attempting to open URL with Linking.openURL...');
-              const opened = await Linking.openURL(kakaoLoginUrl);
-              console.log('✅ Linking.openURL completed successfully');
-              console.log('🔗 Return value:', opened);
-              
-              // 실제 디바이스에서 브라우저가 열렸는지 확인을 위한 추가 로그
-              console.log('📱 Platform:', Platform.OS);
-              console.log('📱 Waiting for deep link callback...');
-              
-              // 타임아웃 제거 - OAuth 콜백이 확실히 처리되므로 불필요
-              // 브라우저가 열리면 사용자가 직접 로그인하고 돌아오므로 타임아웃 불필요
-              console.log('📱 카카오 로그인 브라우저 열림 - 딥링크 대기 중...');
-            } catch (linkError) {
-              console.error('❌ Failed to open URL with Linking:', linkError);
-              setIsLoading(false);
-              Alert.alert('오류', '카카오 로그인 페이지를 열 수 없습니다.');
-            }
-          } else {
-            // 직접 브라우저로 열기 시도
-            console.log('CanOpenURL returned false, trying to open anyway...');
-            try {
-              const opened = await Linking.openURL(kakaoLoginUrl);
-              console.log('Linking.openURL result (fallback):', opened);
-            } catch (openError) {
-              console.error('Failed to open URL:', openError);
-              setIsLoading(false);
-              Alert.alert('오류', '카카오 로그인 페이지를 열 수 없습니다. 브라우저를 확인해주세요.');
-            }
+        // 인앱 브라우저 (Safari View Controller) 사용
+        const result = await WebBrowser.openAuthSessionAsync(
+          kakaoLoginUrl,
+          redirectUrl
+        );
+        
+        console.log('WebBrowser result:', result);
+        
+        if (result.type === 'success' && result.url) {
+          // OAuth 콜백 처리
+          if (onOAuthCallback) {
+            await onOAuthCallback(result.url);
           }
-        } catch (error) {
-          console.error('카카오 로그인 오류:', error);
-          setIsLoading(false);
-          Alert.alert('오류', '카카오 로그인 중 오류가 발생했습니다: ' + (error instanceof Error ? error.message : String(error)));
+        } else if (result.type === 'cancel') {
+          console.log('사용자가 로그인을 취소했습니다.');
         }
+        setIsLoading(false);
       }
     } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      console.error('에러:', error);
+      console.error('카카오 로그인 오류:', error);
       setIsLoading(false);
       Alert.alert('오류', '카카오 로그인 중 오류가 발생했습니다.');
     }
-    // finally 블록 제거: 딥링크가 돌아올 때까지 로딩 상태 유지
   };
 
   const handleGoogleLogin = async () => {
@@ -245,70 +206,83 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation, route, onLogin, o
     setIsLoading(true);
     
     try {
-      // 웹과 모바일에서 다른 redirect URL 사용
-      let redirectUrl;
-      if (Platform.OS === 'web') {
-        redirectUrl = `${window.location.origin}/auth/callback`;
-      } else {
-        // 개발 빌드에서는 커스텀 scheme 사용 (action 파라미터 제거)
-        redirectUrl = 'petconstitution://auth/callback';
-      }
-      
-      // prompt=login 파라미터 추가: 강제로 로그인 화면 표시 (이전 세션 무시)
+      const redirectUrl = 'petconstitution://auth/callback';
       const googleLoginUrl = `https://xpeyzdvtzdtzxxsgcsyf.supabase.co/auth/v1/authorize?provider=google&redirect_to=${encodeURIComponent(redirectUrl)}&prompt=login`;
       console.log('구글 로그인 URL:', googleLoginUrl);
-      console.log('Redirect URL:', redirectUrl);
       
       if (Platform.OS === 'web') {
         window.location.href = googleLoginUrl;
       } else {
-        // Linking으로 열기 (구글 앱이 있으면 앱으로, 없으면 브라우저로)
-        try {
-          // URL이 열 수 있는지 확인
-          const canOpen = await Linking.canOpenURL(googleLoginUrl);
-          console.log('Can open Google URL:', canOpen);
-          
-          if (canOpen) {
-            console.log('Opening Google login URL with Linking...');
-            console.log('URL to open:', googleLoginUrl);
-            
-            try {
-              await Linking.openURL(googleLoginUrl);
-              console.log('Linking.openURL completed successfully');
-              
-              // 타임아웃 제거 - OAuth 콜백이 확실히 처리되므로 불필요
-              // 브라우저가 열리면 사용자가 직접 로그인하고 돌아오므로 타임아웃 불필요
-              console.log('📱 구글 로그인 브라우저 열림 - 딥링크 대기 중...');
-            } catch (linkError) {
-              console.error('Failed to open URL with Linking:', linkError);
-              setIsLoading(false);
-              Alert.alert('오류', '구글 로그인 페이지를 열 수 없습니다.');
-            }
-          } else {
-            // 직접 브라우저로 열기 시도
-            console.log('CanOpenURL returned false, trying to open anyway...');
-            try {
-              const opened = await Linking.openURL(googleLoginUrl);
-              console.log('Linking.openURL result (fallback):', opened);
-            } catch (openError) {
-              console.error('Failed to open URL:', openError);
-              setIsLoading(false);
-              Alert.alert('오류', '구글 로그인 페이지를 열 수 없습니다. 브라우저를 확인해주세요.');
-            }
+        // 인앱 브라우저 (Safari View Controller) 사용
+        const result = await WebBrowser.openAuthSessionAsync(
+          googleLoginUrl,
+          redirectUrl
+        );
+        
+        console.log('WebBrowser result:', result);
+        
+        if (result.type === 'success' && result.url) {
+          // OAuth 콜백 처리
+          if (onOAuthCallback) {
+            await onOAuthCallback(result.url);
           }
-        } catch (error) {
-          console.error('구글 로그인 오류:', error);
-          setIsLoading(false);
-          Alert.alert('오류', '구글 로그인 중 오류가 발생했습니다: ' + (error instanceof Error ? error.message : String(error)));
+        } else if (result.type === 'cancel') {
+          console.log('사용자가 로그인을 취소했습니다.');
         }
+        setIsLoading(false);
       }
     } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      console.error('에러:', error);
+      console.error('구글 로그인 오류:', error);
       setIsLoading(false);
       Alert.alert('오류', '구글 로그인 중 오류가 발생했습니다.');
     }
-    // finally 블록 제거: 딥링크가 돌아올 때까지 로딩 상태 유지
+  };
+
+  // Apple 로그인 (iOS 전용)
+  const handleAppleLogin = async () => {
+    console.log('=== Apple 로그인 시작 ===');
+    setIsLoading(true);
+    
+    try {
+      const credential = await AppleAuthentication.signInAsync({
+        requestedScopes: [
+          AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
+          AppleAuthentication.AppleAuthenticationScope.EMAIL,
+        ],
+      });
+      
+      console.log('Apple credential:', credential);
+      
+      if (credential.identityToken) {
+        // Supabase에 Apple 토큰으로 로그인
+        const { supabase } = require('../services/api');
+        const { data, error } = await supabase.auth.signInWithIdToken({
+          provider: 'apple',
+          token: credential.identityToken,
+        });
+        
+        if (error) {
+          console.error('Supabase Apple 로그인 오류:', error);
+          Alert.alert('오류', 'Apple 로그인에 실패했습니다.');
+        } else {
+          console.log('Apple 로그인 성공:', data);
+          // 네비게이션 스택 리셋하여 홈으로 이동
+          navigation.reset({
+            index: 0,
+            routes: [{ name: 'Start' }],
+          });
+        }
+      }
+    } catch (error: any) {
+      if (error.code === 'ERR_REQUEST_CANCELED') {
+        console.log('사용자가 Apple 로그인을 취소했습니다.');
+      } else {
+        console.error('Apple 로그인 오류:', error);
+        Alert.alert('오류', 'Apple 로그인 중 오류가 발생했습니다.');
+      }
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   // 네이버 로그인 제거됨
@@ -351,7 +325,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation, route, onLogin, o
         ]}
       >
         {/* 하단: 흰색 배경 + 로그인 버튼 */}
-        <View style={[styles.bottomSection, { paddingBottom: styles.bottomSection.paddingBottom + insets.bottom }]}>
+        <View style={styles.bottomSection}>
           {/* 카카오 로그인 버튼 */}
           <TouchableOpacity
             style={[styles.socialButton, isLoading && styles.disabledButton]}
@@ -379,6 +353,17 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation, route, onLogin, o
             />
             <Text style={styles.socialButtonText}>구글 계정으로 시작하기</Text>
           </TouchableOpacity>
+
+          {/* Apple 로그인 버튼 (iOS만) */}
+          {Platform.OS === 'ios' && (
+            <AppleAuthentication.AppleAuthenticationButton
+              buttonType={AppleAuthentication.AppleAuthenticationButtonType.SIGN_IN}
+              buttonStyle={AppleAuthentication.AppleAuthenticationButtonStyle.BLACK}
+              cornerRadius={scale(15)}
+              style={styles.appleButton}
+              onPress={handleAppleLogin}
+            />
+          )}
         </View>
       </Animated.View>
 
@@ -530,7 +515,11 @@ const styles = StyleSheet.create({
   },
   googleButton: {
     backgroundColor: '#eaeaea',
-    marginBottom: 0,
+    marginBottom: scale(100),
+  },
+  appleButton: {
+    width: '100%',
+    height: scale(130),
   },
   socialButtonText: {
     color: '#0e0e0e',
