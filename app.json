@@ -2,7 +2,7 @@
   "expo": {
     "name": "온솔 반려동물 체질 검사",
     "slug": "pet-constitution-mobile",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
