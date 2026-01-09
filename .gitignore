@@ -43,3 +43,6 @@ yarn-error.*
 # Android keystore and sensitive config
 android/gradle.properties
 *.keystore
+
+# Temporary files
+tore .

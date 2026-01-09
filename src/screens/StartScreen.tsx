@@ -7,6 +7,8 @@ import {
   SafeAreaView,
   Image,
   ScrollView,
+  Linking,
+  Alert,
 } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { User } from '../types';
@@ -44,6 +46,23 @@ const StartScreen: React.FC<StartScreenProps> = ({
 
   const goToMyPage = () => {
     navigation.navigate('MyPage');
+  };
+
+  const handleKakaoChannel = async () => {
+    // 카카오채널 링크
+    const kakaoChannelUrl = 'https://pf.kakao.com/_uMXkn';
+    
+    try {
+      const supported = await Linking.canOpenURL(kakaoChannelUrl);
+      if (supported) {
+        await Linking.openURL(kakaoChannelUrl);
+      } else {
+        Alert.alert('오류', '카카오채널을 열 수 없습니다.');
+      }
+    } catch (error) {
+      console.error('카카오채널 열기 오류:', error);
+      Alert.alert('오류', '카카오채널을 열 수 없습니다.');
+    }
   };
 
   return (
@@ -109,6 +128,15 @@ const StartScreen: React.FC<StartScreenProps> = ({
             <Text style={styles.disclaimer}>
               {isLoggedIn ? '※ 내 정보와 진단 결과를 확인할 수 있습니다.' : '※ 결과는 브라우저에만 저장됩니다.'}
             </Text>
+            
+            <TouchableOpacity 
+              style={styles.kakaoChannelButton} 
+              onPress={handleKakaoChannel}
+            >
+              <Text style={styles.kakaoChannelButtonText}>
+                카카오채널 친구 추가
+              </Text>
+            </TouchableOpacity>
           </View>
         </View>
       </ScrollView>
@@ -240,6 +268,28 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginBottom: scale(45),
     fontFamily: getFontFamily('regular'),
+  },
+  kakaoChannelButton: {
+    backgroundColor: '#fae100', // 카카오 노란색
+    borderRadius: scale(15),
+    paddingVertical: scale(50),
+    width: scale(755),
+    alignItems: 'center',
+    marginBottom: scale(70),
+    marginTop: scale(20),
+    shadowColor: 'rgba(100, 100, 111, 0.68)',
+    shadowOffset: {
+      width: 0,
+      height: scale(14),
+    },
+    shadowOpacity: 0.2,
+    shadowRadius: scale(58),
+    elevation: 7,
+  },
+  kakaoChannelButtonText: {
+    fontSize: scale(48),
+    color: '#5c530b', // 진한 갈색
+    fontFamily: getFontFamily('extraBold'),
   },
 });
 

@@ -118,7 +118,7 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({
 
   const constitutionColor = getConstitutionColor(constitution);
 
-  const handleSendEmail = async () => {
+  const handleSaveEmail = async () => {
     if (!email.trim()) {
       Alert.alert('오류', '이메일 주소를 입력해주세요.');
       return;
@@ -145,31 +145,32 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({
 
       // 결과 ID 확인 (마이페이지에서 온 경우 또는 저장된 결과)
       const currentResultId = resultId || savedResultId;
-      console.log('=== EMAIL SEND DEBUG ===');
+      console.log('=== EMAIL SAVE DEBUG ===');
       console.log('resultId from route:', resultId);
       console.log('savedResultId:', savedResultId);
       console.log('currentResultId:', currentResultId);
       console.log('email:', email);
       
       if (!currentResultId) {
-        Alert.alert('알림', '이메일을 보내려면 먼저 결과를 저장해주세요.');
+        Alert.alert('알림', '이메일을 저장하려면 먼저 결과를 저장해주세요.');
         setIsSendingEmail(false);
         return;
       }
 
-      console.log('Sending email with resultId:', currentResultId);
-      const response = await resultsAPI.sendDietEmail(currentResultId, email, authToken);
+      // results 테이블에 이메일 저장 (업데이트)
+      console.log('Saving email with resultId:', currentResultId);
+      const response = await resultsAPI.updateResultEmail(currentResultId, email.trim(), authToken);
       
       if (response.success) {
-        Alert.alert('성공', '이메일이 성공적으로 전송되었습니다!');
+        Alert.alert('성공', '이메일 주소가 저장되었습니다. 관리자가 확인 후 연락드리겠습니다.');
         setShowEmailModal(false);
         setEmail('');
       } else {
-        Alert.alert('오류', response.message || '이메일 전송에 실패했습니다.');
+        Alert.alert('오류', response.message || '이메일 저장에 실패했습니다.');
       }
     } catch (error) {
-      console.error('Email send error:', error);
-      Alert.alert('오류', '이메일 전송 중 오류가 발생했습니다.');
+      console.error('Email save error:', error);
+      Alert.alert('오류', '이메일 저장 중 오류가 발생했습니다.');
     } finally {
       setIsSendingEmail(false);
     }
@@ -821,7 +822,7 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({
               onPress={() => {
                 const currentResultId = resultId || savedResultId;
                 if (!currentResultId) {
-                  Alert.alert('알림', '이메일을 보내려면 먼저 결과를 저장해주세요.');
+                Alert.alert('알림', '이메일을 저장하려면 먼저 결과를 저장해주세요.');
                   return;
                 }
                 if (user?.email) {
@@ -995,7 +996,7 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({
                 
                 <Text style={styles.modalTitle}>ONSOL ANIMAL HOSPITAL</Text>
                 <Text style={styles.modalSubtitle}>
-                  샘플 받으실{'\n'}
+                  연락받을{'\n'}
                   이메일을 적어주세요.
                 </Text>
                 <Image source={require('../../assets/images/results-popimg.png')} style={styles.modalImg}/>
@@ -1017,11 +1018,11 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({
                 <View style={styles.modalButtons}>
                   <TouchableOpacity 
                     style={[styles.modalSendButton, isSendingEmail && styles.disabledButton]}
-                    onPress={handleSendEmail}
+                    onPress={handleSaveEmail}
                     disabled={isSendingEmail}
                   >
                     <Text style={styles.modalSendButtonText}>
-                      {isSendingEmail ? '전송 중...' : '제출하기'}
+                      {isSendingEmail ? '저장 중...' : '제출하기'}
                     </Text>
                   </TouchableOpacity>
                 </View>

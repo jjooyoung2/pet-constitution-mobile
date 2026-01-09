@@ -26,7 +26,8 @@
           }
         }
       ],
-      "expo-web-browser"
+      "expo-web-browser",
+      "expo-updates"
     ],
     "ios": {
       "supportsTablet": false,
@@ -78,6 +79,12 @@
       "eas": {
         "projectId": "920da7a1-7f23-42ac-ba0d-144194d01305"
       }
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/920da7a1-7f23-42ac-ba0d-144194d01305"
     }
   }
 }

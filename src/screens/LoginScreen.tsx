@@ -220,8 +220,10 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation, route, onLogin, o
           // Supabase 세션 직접 설정 (onAuthStateChange가 처리)
           const success = await handleOAuthResult(result.url);
           if (success) {
-            // 로그인 성공 시 모달 닫기
-            navigation.goBack();
+            // 로그인 성공 시 모달 닫기 (이전 화면이 있을 때만)
+            if (navigation.canGoBack()) {
+              navigation.goBack();
+            }
           }
         } else if (result.type === 'cancel') {
           console.log('사용자가 로그인을 취소했습니다.');
@@ -259,8 +261,10 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation, route, onLogin, o
           // Supabase 세션 직접 설정 (onAuthStateChange가 처리)
           const success = await handleOAuthResult(result.url);
           if (success) {
-            // 로그인 성공 시 모달 닫기
-            navigation.goBack();
+            // 로그인 성공 시 모달 닫기 (이전 화면이 있을 때만)
+            if (navigation.canGoBack()) {
+              navigation.goBack();
+            }
           }
         } else if (result.type === 'cancel') {
           console.log('사용자가 로그인을 취소했습니다.');
@@ -344,7 +348,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation, route, onLogin, o
             duration: 250,
             useNativeDriver: true,
           }).start(() => {
-            if (navigation.goBack && typeof navigation.goBack === 'function') {
+            if (navigation.goBack && typeof navigation.goBack === 'function' && navigation.canGoBack()) {
               navigation.goBack();
             }
           });

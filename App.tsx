@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer, CommonActions } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Linking, Alert, Platform } from 'react-native';
 import { useFonts } from 'expo-font';
+import * as Updates from 'expo-updates';
 import { User } from './src/types';
 import { authAPI, supabase } from './src/services/api';
 
@@ -57,6 +58,41 @@ export default function App() {
       console.log('⏳ Loading fonts...');
     }
   }, [isFontsReady]);
+
+  // 앱 시작 시 업데이트 체크
+  useEffect(() => {
+    async function onFetchUpdateAsync() {
+      try {
+        // 개발 모드에서는 업데이트 체크하지 않음
+        if (__DEV__) {
+          console.log('🔧 개발 모드: 업데이트 체크 건너뜀');
+          return;
+        }
+
+        // 업데이트가 활성화되어 있는지 확인
+        if (!Updates.isEnabled) {
+          console.log('⚠️ EAS Updates가 비활성화되어 있습니다.');
+          return;
+        }
+
+        console.log('🔄 업데이트 체크 중...');
+        const update = await Updates.checkForUpdateAsync();
+
+        if (update.isAvailable) {
+          console.log('✅ 새 업데이트 발견! 다운로드 중...');
+          await Updates.fetchUpdateAsync();
+          console.log('✅ 업데이트 다운로드 완료! 앱을 재시작합니다...');
+          await Updates.reloadAsync();
+        } else {
+          console.log('✅ 최신 버전입니다.');
+        }
+      } catch (error) {
+        console.error('❌ 업데이트 체크 실패:', error);
+      }
+    }
+
+    onFetchUpdateAsync();
+  }, []);
 
   // 앱 시작 시 로그인 상태 확인
   useEffect(() => {
@@ -304,16 +340,16 @@ export default function App() {
         const resultDataStr = await AsyncStorage.getItem('resultData');
         
         if (navigationRef.current) {
-          // Login 화면이 열려있으면 닫기
-          navigationRef.current.goBack();
+          // Login 화면이 열려있으면 먼저 닫기 (canGoBack 체크 추가)
+          if (navigationRef.current.canGoBack()) {
+            navigationRef.current.goBack();
+          }
           
           setTimeout(() => {
             if (navigationRef.current) {
               if (returnToResults === 'true' && resultDataStr) {
                 // 결과 페이지로 돌아가기
                 const resultData = JSON.parse(resultDataStr);
-                // navigationRef에는 replace가 없으므로 navigate 사용
-                // Results 화면이 이미 스택에 있으면 그 화면으로 돌아감
                 navigationRef.current.navigate('Results', resultData);
                 // AsyncStorage 정리
                 AsyncStorage.removeItem('returnToResults');

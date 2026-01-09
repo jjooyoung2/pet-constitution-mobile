@@ -262,7 +262,7 @@ export const resultsAPI = {
     });
   },
 
-  // 이메일로 식단 전송
+  // 이메일로 식단 전송 (deprecated - 이제 사용 안 함)
   sendDietEmail: async (resultId: string, email: string, token: string): Promise<ApiResponse<{ message: string }>> => {
     if (__DEV__) {
       console.log('=== API SEND EMAIL DEBUG ===');
@@ -277,6 +277,26 @@ export const resultsAPI = {
       body: JSON.stringify(requestBody),
       headers: {
         Authorization: `Bearer ${token}`,
+      },
+    });
+  },
+
+  // 결과에 이메일 저장
+  updateResultEmail: async (resultId: string, email: string, token: string): Promise<ApiResponse<{ message: string }>> => {
+    if (__DEV__) {
+      console.log('=== API UPDATE RESULT EMAIL DEBUG ===');
+      console.log('resultId:', resultId);
+      console.log('email:', email);
+    }
+    
+    const requestBody = { resultId, email };
+    
+    return apiCall<{ message: string }>('/results-update-email', {
+      method: 'POST',
+      body: JSON.stringify(requestBody),
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
       },
     });
   },
